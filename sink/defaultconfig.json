@@ -1,0 +1,10 @@
+{
+	"serviceMode": "true",
+	"mqttPort": 1883,
+	"mqttBroker": "ssl://todo:1883",
+	"mqttReadTopic": "TODO",
+	"mqttWriteTopic": "TODO",
+	"messageTemplate": "{ \"SortLength\": %d, \"Payload\": %s }",
+	"mqttClientId": "papers",
+	"mqttUser": "rfun"
+}
