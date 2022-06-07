@@ -24,6 +24,7 @@ func main() {
 	containers.InitContainerNetworking()
 
 	for i := 0; i < config.Cfg.NumServices; i++ {
+		fmt.Printf("Reading svc%d.json\n", i)
 		jsonBytes, err := os.ReadFile(fmt.Sprintf("svc%d.json", i))
 		if err != nil {
 			fmt.Printf("Failed to read svc%d.json", i)

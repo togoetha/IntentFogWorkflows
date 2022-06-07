@@ -19,17 +19,18 @@ import (
 
 func InitContainerNetworking() {
 	cmd := fmt.Sprintf("sh -x ./startcni.sh")
-	_, err := utils.ExecCmdBash(cmd)
+	output, err := utils.ExecCmdBash(cmd)
+	fmt.Println(output)
 	if err != nil {
 		fmt.Println("Could not set up cni0")
-		panic(err)
 	}
 
 	for subnetMask, brip := range config.Cfg.SubnetBridgeIPs {
 		subnet := strings.Split(subnetMask, "/")[0]
 		mask := strings.Split(subnetMask, "/")[1]
-		cmd = fmt.Sprintf("sh -x ./addcniiip.sh %s %s %s", subnet, mask, brip)
-		_, err = utils.ExecCmdBash(cmd)
+		cmd = fmt.Sprintf("sh -x ./addcniip.sh %s %s %s", subnet, mask, brip)
+		output, err = utils.ExecCmdBash(cmd)
+		fmt.Println(output)
 	}
 	//nodeSubnetsMasks = subnetsMasks
 	//subnetMask, _ = strconv.Atoi(subMask)
@@ -48,11 +49,16 @@ func InitContainerNetworking() {
 func SetupRoutes(ipRouteMap map[string]string) {
 	// ip route add $nodeip/$mask via $routeip dev $extif
 
-	for svcIP, publicIP := range config.Cfg.IPRouteMap {
-		cmd := fmt.Sprintf("sh -x ./addroute.sh %s %s", svcIP, publicIP)
-		_, err := utils.ExecCmdBash(cmd)
+	for svcIPMask, publicIP := range config.Cfg.IPRouteMap {
+		cmd := fmt.Sprintf("ip route get %s | grep -E -o '[0-9\\.]* dev [a-z0-9]*'", publicIP)
+		route, err := utils.ExecCmdBash(cmd)
+		routeDev := strings.Split(route, " ")[2]
+
+		svcIP := strings.Split(svcIPMask, "/")[0]
+		cmd = fmt.Sprintf("sh -x ./addroute.sh %s %s %s", svcIP, publicIP, routeDev)
+		_, err = utils.ExecCmdBash(cmd)
 		if err != nil {
-			fmt.Printf("Failed to set up route %s to %s", publicIP, svcIP)
+			fmt.Printf("Failed to set up route %s to %s\n", publicIP, svcIP)
 		}
 	}
 }

@@ -13,41 +13,46 @@ nodes:
     publicip: "10.2.0.93"
     services:
       - name: "n1_wf1_ms1"
-        image: some/container
-        bandwidth: "15Mbps"
+        image: togoetha/dummyprocessor
+        bandwidth: "15M"
         memory: "200M"
         cpu: "100m"
+        latency: 0
         mipaddr: "192.168.99.1/24"
         dipaddr: ["172.12.0.254/24", "192.168.0.1/30", "192.168.0.5/30", "192.168.0.9/30"]
       - name: "n1_wf1_ms2"
-        image: some/container
-        bandwidth: "30Mbps"
+        image: togoetha/dummyprocessor
+        bandwidth: "30M"
         memory: "300M"
         cpu: "200m"
+        latency: 0
         mipaddr: "192.168.99.2/24"
         dipaddr: ["192.168.0.2/30", "192.168.0.13/30"]
   - name: node2
     publicip: "10.2.0.94"
     services:
       - name: "n2_wf1_ms3"
-        image: some/container
-        bandwidth: "100Mbps"
+        image: togoetha/dummyprocessor
+        bandwidth: "100M"
         memory: "250M"
         cpu: "150m"
+        latency: 0
         mipaddr: "192.168.99.3/24"
         dipaddr: ["192.168.0.6/30", "192.168.0.17/30"]
       - name: "n2_wf1_ms4"
-        image: some/container
-        bandwidth: "100Mbps"
+        image: togoetha/dummyprocessor
+        bandwidth: "100M"
         memory: "250M"
         cpu: "150m"
+        latency: 0
         mipaddr: "192.168.99.4/24"
         dipaddr: ["192.168.0.10/30", "192.168.0.21/30"]
       - name: "n2_wf1_ms5"
-        image: some/container
-        bandwidth: "100Mbps"
+        image: togoetha/dummyprocessor
+        bandwidth: "100M"
         memory: "250M"
         cpu: "150m"
+        latency: 0
         mipaddr: "192.168.99.5/24"
         dipaddr: ["192.168.0.14/30", "192.168.0.18/30", "192.168.0.22/30", "172.12.0.253/24"]
 links:

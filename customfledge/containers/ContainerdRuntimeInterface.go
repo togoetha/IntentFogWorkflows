@@ -211,7 +211,7 @@ func (dri *ContainerdRuntimeInterface) DeployContainer(namespace string, pod *v1
 			fmt.Println(err.Error())
 			return "", err
 		}
-	} else {
+	} else if err != nil {
 		fmt.Println(err.Error())
 		return "", err
 	}
@@ -317,8 +317,10 @@ func (dri *ContainerdRuntimeInterface) SetupPodIPs(pod *v1.Pod, task containerd.
 			bw := resource.MustParse(pod.Labels["Bandwidth"])
 			latency, _ := strconv.Atoi(pod.Labels["Latency"])
 			bandwidth, _ := bw.AsInt64()
-			filtaddresses := []string{}
+			fmt.Printf("Adding maddress %s\n", maddress)
+			filtaddresses := []string{maddress}
 			for _, daddress := range daddresses {
+				fmt.Printf("Adding daddress %s\n", daddress)
 				filtaddresses = append(filtaddresses, strings.Split(daddress, "/")[0])
 			}
 

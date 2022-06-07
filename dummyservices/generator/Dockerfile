@@ -16,12 +16,12 @@ COPY . /go/src/generator
 WORKDIR /go/src/generator
 ARG BUILD_TAGS="netgo osusergo"
 
-RUN go build -o generator -ldflags "-w" *.go
-RUN cp generator /usr/bin/generator
+RUN go build -o service -ldflags "-w" *.go
+RUN cp service /usr/bin/service
 
 FROM alpine:edge
-COPY --from=builder /usr/bin/generator /usr/bin/generator
+COPY --from=builder /usr/bin/service /usr/bin/service
 COPY ./defaultconfig.json /usr/bin/defaultconfig.json
 
 WORKDIR /usr/bin
-ENTRYPOINT [ "./generator" ] 
+ENTRYPOINT [ "./service" ] 

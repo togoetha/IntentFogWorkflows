@@ -1,4 +1,4 @@
-#! /bin/sh
+#!/bin/bash -v
 
 if [[ -z "${6:-}" ]]; then
   echo "Use: setupcontainercni.sh containername pid cniif gwip subnetsize bandwidth latency containerip" 1>&2
@@ -25,12 +25,15 @@ containerip=${1}
 #soft link the process to the container's network namespace
 
 mkdir -p /var/run/netns
-ln -s /proc/$pid/ns/net /var/run/netns/$containername
+#ln -s /proc/$pid/ns/net /var/run/netns/$containername
+ip netns attach $containername $pid
 
 #generate device name and create veth, linking it to container device
 rand=$(tr -dc 'A-F0-9' < /dev/urandom | head -c4)
 hostif="veth$rand"
 ip link add $cniif type veth peer name $hostif 
+
+tc qdisc add dev $cniif root tbf rate $bandwidth burst 250000 latency $latency 
 
 #link $hostif to cni0
 ip link set $hostif up 
@@ -46,4 +49,4 @@ ip netns exec $containername ip link set $cniif up
 ip netns exec $containername ip addr add $containerip/$subnetsize dev $cniif
 ip netns exec $containername ip route replace default via $gwip dev $cniif 
 
-tc qdisc add dev $cniif root tbf rate $bandwidth latency $latency 
+

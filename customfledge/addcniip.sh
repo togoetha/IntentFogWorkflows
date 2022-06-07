@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/sh -v
 
 if [[ -z "${3:-}" ]]; then
   echo "Use: addcniip.sh subnet mask bridgeip" 1>&2

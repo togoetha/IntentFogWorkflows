@@ -4,7 +4,6 @@ import (
 	"converter/config"
 	"encoding/json"
 	"fmt"
-	"math"
 	"os"
 	"strconv"
 	"strings"
@@ -65,9 +64,9 @@ func convertToDeployments(inputYamlFile string) {
 		//handle first and last differently
 		subnets := make(map[string]string)
 		for _, subnet := range nodeSubnets {
-			subMask, _ := strconv.Atoi(strings.Split(subnet, "/")[1])
+			//subMask, _ := strconv.Atoi(strings.Split(subnet, "/")[1])
 			baseSubnetIP, _ := IPStringToInt(strings.Split(subnet, "/")[0])
-			subnets[subnet], _ = IPIntToString(baseSubnetIP + int(math.Pow(2, float64(subMask))) - counter)
+			subnets[subnet], _ = IPIntToString(baseSubnetIP + 254 - counter) //int(math.Pow(2, float64(subMask))) - counter - 1)
 		}
 
 		nodeConfigs[nodeInfo.Name] = NodeConfig{
@@ -86,15 +85,17 @@ func convertToDeployments(inputYamlFile string) {
 						"MAddress":   podInfo.Mipaddr,
 						"DAddresses": strings.Join(podInfo.Dipaddr, ","),
 						"Bandwidth":  podInfo.Bandwidth,
+						"Latency":    strconv.Itoa(podInfo.Latency),
 					},
 				},
 				Spec: corev1.PodSpec{
 					Containers: []corev1.Container{
 						{
-							Name:    podInfo.Name,
-							Image:   podInfo.Image,
-							Command: []string{"./service"},
-							Args:    getNextAddresses(podInfo, exp.Links),
+							Name:            podInfo.Name,
+							Image:           podInfo.Image,
+							ImagePullPolicy: corev1.PullIfNotPresent,
+							Command:         []string{"./service"},
+							Args:            getNextAddresses(podInfo, exp.Links),
 							Resources: corev1.ResourceRequirements{
 								Limits: corev1.ResourceList{
 									corev1.ResourceCPU:    resource.MustParse(podInfo.Cpu),
@@ -220,6 +221,7 @@ type ServiceInfo struct {
 	Bandwidth string
 	Memory    string
 	Cpu       string
+	Latency   int
 	Mipaddr   string
 	Dipaddr   []string
 }

@@ -16,12 +16,12 @@ COPY . /go/src/processor
 WORKDIR /go/src/processor
 ARG BUILD_TAGS="netgo osusergo"
 
-RUN go build -o processor -ldflags "-w" *.go
-RUN cp processor /usr/bin/processor
+RUN go build -o service -ldflags "-w" *.go
+RUN cp service /usr/bin/service
 
 FROM alpine:edge
-COPY --from=builder /usr/bin/processor /usr/bin/processor
+COPY --from=builder /usr/bin/service /usr/bin/service
 COPY ./defaultconfig.json /usr/bin/defaultconfig.json
 
 WORKDIR /usr/bin
-ENTRYPOINT [ "./processor" ] 
+ENTRYPOINT [ "./service" ] 

@@ -19,12 +19,14 @@ func BindNetNamespace(namespace string, pod string, pid int, bandwidth int64, la
 	ipsPerSubnet := make(map[string][]string)
 	for subnet, gwip := range config.Cfg.SubnetBridgeIPs {
 		subnetParts := strings.Split(subnet, "/")
+		fmt.Printf("Matching pod IPs for subnet %s\n", subnetParts[0])
 		mask := subnetParts[1]
 		ipParts := strings.Split(subnetParts[0], ".")
 
 		ips := []string{}
 		for _, podip := range podips {
 			podIpParts := strings.Split(podip, ".")
+			fmt.Printf("Matching IP %s\n", podip)
 			if ipParts[0] == podIpParts[0] && ipParts[1] == podIpParts[1] && ipParts[2] == podIpParts[2] {
 				ips = append(ips, podip)
 			}
