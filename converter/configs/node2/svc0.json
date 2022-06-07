@@ -1,0 +1,1 @@
+{"metadata":{"name":"n2_wf1_ms3","namespace":"default","creationTimestamp":null,"labels":{"Bandwidth":"100Mbps","DAddresses":"192.168.0.6/30,192.168.0.17/30","MAddress":"192.168.99.3/24"}},"spec":{"containers":[{"name":"n2_wf1_ms3","image":"some/container","command":["./service"],"args":["192.168.0.18/30"],"resources":{"limits":{"cpu":"150m","memory":"250M"}}}]},"status":{}}
