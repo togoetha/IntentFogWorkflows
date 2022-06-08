@@ -82,6 +82,18 @@ func sendRESTMessage(message Message) {
 			fmt.Printf("Failed to write to service %s\n", serviceUrl)
 		}
 	}
+
+	logline := fmt.Sprintf("Message id %d sent\n", message.MessageId)
+	fmt.Println(logline)
+	f, err := os.OpenFile("/usr/bin/output.txt", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0666)
+	if err != nil {
+		panic(err)
+	}
+
+	defer f.Close()
+	if _, err = f.WriteString(logline); err != nil {
+		panic(err)
+	}
 }
 
 func sendMqttMessage(message Message) {

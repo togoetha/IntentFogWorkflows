@@ -22,6 +22,7 @@ RUN cp service /usr/bin/service
 FROM alpine:edge
 COPY --from=builder /usr/bin/service /usr/bin/service
 COPY ./defaultconfig.json /usr/bin/defaultconfig.json
+COPY ./output.txt /usr/bin/output.txt
 
 WORKDIR /usr/bin
 ENTRYPOINT [ "./generator" ] 

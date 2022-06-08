@@ -50,5 +50,15 @@ func execCmdBash(dfCmd string) (string, error) {
 
 func finishMessage(msg Message) {
 	timetaken := time.Since(time.UnixMicro(msg.StartTime))
-	fmt.Printf("Message id %d took %d ms\n", msg.MessageId, timetaken.Microseconds()/1000.0)
+	logline := fmt.Sprintf("Message id %d took %d ms\n", msg.MessageId, timetaken.Microseconds()/1000.0)
+	fmt.Println(logline)
+	f, err := os.OpenFile("/usr/bin/output.txt", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0666)
+	if err != nil {
+		panic(err)
+	}
+
+	defer f.Close()
+	if _, err = f.WriteString(logline); err != nil {
+		panic(err)
+	}
 }
