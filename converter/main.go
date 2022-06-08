@@ -122,7 +122,7 @@ func convertToDeployments(inputYamlFile string) {
 		err = os.MkdirAll(fmt.Sprintf("configs/%s", node), 0777)
 		contents, err := json.Marshal(cfg)
 		if err == nil {
-			os.WriteFile(fmt.Sprintf("configs/%s/%s.json", node, node), contents, 0777)
+			os.WriteFile(fmt.Sprintf("configs/%s/defaultconfig.json", node), contents, 0777)
 		}
 	}
 
