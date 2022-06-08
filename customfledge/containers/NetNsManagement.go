@@ -53,7 +53,7 @@ func BindNetNamespace(namespace string, pod string, pid int, bandwidth int64, la
 				utils.ExecCmdBash(cmd)
 			}
 
-			cmd = fmt.Sprintf("ip netns exec $containername ip route replace default via %s dev %s", gwip, cniif)
+			cmd = fmt.Sprintf("ip netns exec %s ip route replace default via %s dev %s", netNs, gwip, cniif)
 			utils.ExecCmdBash(cmd)
 		}
 		counter++
