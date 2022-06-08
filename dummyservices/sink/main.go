@@ -23,7 +23,7 @@ func main() {
 	fmt.Println(time.Now().UnixNano())
 	if config.Cfg.ServiceMode {
 		router := NewRouter()
-		log.Fatal(http.ListenAndServe(":8081", router))
+		log.Fatal(http.ListenAndServe(":8080", router))
 	} else {
 		processMessages()
 	}

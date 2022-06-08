@@ -81,7 +81,7 @@ func convertToDeployments(inputYamlFile string) {
 			args := []string{"defaultconfig.json", nodeInfo.Name}
 			addresses := getNextAddresses(podInfo, exp.Links)
 			for _, address := range addresses {
-				args = append(args, address)
+				args = append(args, strings.Split(address, "/")[0])
 			}
 			pod := corev1.Pod{
 				ObjectMeta: v1.ObjectMeta{
