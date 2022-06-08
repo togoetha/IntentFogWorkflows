@@ -20,6 +20,11 @@ func main() {
 
 	config.LoadConfig(cfgFile)
 
+	now := time.Now().UnixMicro()
+	time.Sleep(5 * time.Second)
+	timetaken := time.Since(time.UnixMicro(now))
+	fmt.Println(timetaken.Microseconds())
+
 	fmt.Println(time.Now().UnixNano())
 	if config.Cfg.ServiceMode {
 		router := NewRouter()
