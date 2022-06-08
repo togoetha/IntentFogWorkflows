@@ -9,7 +9,6 @@ import (
 var Cfg *Config
 
 type Config struct {
-	InstanceName  string `json:"instanceName"`
 	ServiceMode   bool   `json:"serviceMode"`
 	MqttBroker    string `json:"mqttBroker"`
 	MqttTopicRead string `json:"mqttTopicRead"`

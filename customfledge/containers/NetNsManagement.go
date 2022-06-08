@@ -41,11 +41,13 @@ func BindNetNamespace(namespace string, pod string, pid int, bandwidth int64, la
 	//Here we just need to set up net namespace + array of IP addresses, routing is done separately after starting all containers
 	counter := 1
 	for subnet, ips := range ipsPerSubnet {
-		gwip := strings.Split(subnet, "/")[0]
-		subnetMask := strings.Split(subnet, "/")[1]
-		cniif := fmt.Sprintf("eth%d", counter)
-		cmd := fmt.Sprintf("sh -x ./setupcontainercni.sh %s %d %s %s %s %d %d %s", netNs, pid, cniif, gwip, subnetMask, bandwidth, latency, strings.Join(ips, " "))
-		utils.ExecCmdBash(cmd)
+		if len(ips) > 0 {
+			gwip := strings.Split(subnet, "/")[0]
+			subnetMask := strings.Split(subnet, "/")[1]
+			cniif := fmt.Sprintf("eth%d", counter)
+			cmd := fmt.Sprintf("sh -x ./setupcontainercni.sh %s %d %s %s %s %d %d %s", netNs, pid, cniif, gwip, subnetMask, bandwidth, latency, strings.Join(ips, " "))
+			utils.ExecCmdBash(cmd)
+		}
 		counter++
 	}
 }

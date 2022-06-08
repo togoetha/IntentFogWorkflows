@@ -43,7 +43,8 @@ func handleMessage(client mqtt.Client, message mqtt.Message) {
 	json.Unmarshal(message.Payload(), &msg)
 
 	go func() {
-		bubbleSort(msg.SortSize)
+		//bubbleSort(msg.SortSize)
 		//sendNextMqttMessage(msg.MessageId)
+		finishMessage(msg)
 	}()
 }

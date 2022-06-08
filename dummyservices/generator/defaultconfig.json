@@ -1,10 +1,7 @@
 {
-	"mqttPort": 1883,
-	"canInterface": "can0",
-	"mqttBroker": "ssl://mqtt-preproduction.romware.com:1883",
-	"mqttTopicStart": "wearable/866349041040308/out/incident/create",
-	"mqttTopicStop": "wearable/866349041040308/out/incident/cancel",
-	"messageTemplate": "{ \"TYP\": 4, \"UTC\": %d }",
-	"mqttClientId": "flexnet",
-	"mqttUser": "flexnet"
+	"messages": 1000,
+	"messageFrequency": 20,
+	"payloadSize": 200,
+	"serviceMode": true,
+	"pushServiceURL": "http://%s:8080/process"
 }

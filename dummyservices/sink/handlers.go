@@ -13,12 +13,13 @@ func ProcessMessage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	go func() {
-		bubbleSort(message.SortSize)
+		//bubbleSort(config.Cfg.DefaultWorkload)
 		//sendNextRESTMessage(message.MessageId)
+		finishMessage(message)
 	}()
 }
 
-func bubbleSort(n int) []int {
+/*func bubbleSort(n int) []int {
 	numbers := []int{}
 	for i := 0; i < n; i++ {
 		numbers = append(numbers, n-i)
@@ -32,4 +33,4 @@ func bubbleSort(n int) []int {
 		}
 	}
 	return numbers
-}
+}*/

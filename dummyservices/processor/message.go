@@ -5,7 +5,7 @@ import (
 )
 
 type Message struct {
-	SortSize  int    `json:"sortSize"`
+	StartTime int64  `json:"startTime"`
 	Payload   string `json:"payload"`
 	MessageId int    `json:"messageId"`
 }

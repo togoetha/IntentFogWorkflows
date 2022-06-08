@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"generator/config"
-	"log"
 	"net/http"
 	"os"
 	"os/exec"
@@ -15,11 +14,16 @@ import (
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 )
 
+var InstanceName string
+var TargetIPs []string
+
 func main() {
 	argsWithoutProg := os.Args[1:]
 	cfgFile := "defaultconfig.json"
 	if len(argsWithoutProg) > 0 {
 		cfgFile = argsWithoutProg[0]
+		InstanceName = argsWithoutProg[1]
+		TargetIPs = argsWithoutProg[2:]
 	}
 
 	config.LoadConfig(cfgFile)
@@ -32,16 +36,17 @@ var running bool
 func generate() {
 	frequency := 1000 / config.Cfg.MessageFrequency
 	id := 1
-	running = true
+	//running = true
 
-	for running {
+	for i := 0; i < config.Cfg.Messages; i++ {
 		go func() {
 			message := generateMessage(config.Cfg.PayloadSize)
 			message.MessageId = id
-			message.SortSize = config.Cfg.DefaultWorkloadSize
+			message.StartTime = time.Now().UnixMicro()
+			//message.SortSize = config.Cfg.DefaultWorkloadSize
 
 			if config.Cfg.ServiceMode {
-
+				sendRESTMessage(message)
 			} else {
 				sendMqttMessage(message)
 			}
@@ -68,16 +73,18 @@ func execCmdBash(dfCmd string) (string, error) {
 func sendRESTMessage(message Message) {
 	jsonData, err := json.Marshal(message)
 
-	_, err = http.Post(config.Cfg.PushServiceURL, "application/json",
-		bytes.NewBuffer(jsonData))
+	for _, targetIP := range TargetIPs {
+		serviceUrl := fmt.Sprintf(config.Cfg.PushServiceURL, targetIP)
+		_, err = http.Post(serviceUrl, "application/json",
+			bytes.NewBuffer(jsonData))
 
-	if err != nil {
-		log.Fatal(err)
+		if err != nil {
+			fmt.Printf("Failed to write to service %s\n", serviceUrl)
+		}
 	}
 }
 
 func sendMqttMessage(message Message) {
-	fmt.Println("Sending content to MQTT")
 	fmt.Println("Sending content to MQTT")
 	client := *getClient()
 	if token := client.Connect(); token.Wait() && token.Error() != nil {

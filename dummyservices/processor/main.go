@@ -11,11 +11,16 @@ import (
 	"time"
 )
 
+var InstanceName string
+var TargetIPs []string
+
 func main() {
 	argsWithoutProg := os.Args[1:]
 	cfgFile := "defaultconfig.json"
 	if len(argsWithoutProg) > 0 {
 		cfgFile = argsWithoutProg[0]
+		InstanceName = argsWithoutProg[1]
+		TargetIPs = argsWithoutProg[2:]
 	}
 
 	config.LoadConfig(cfgFile)

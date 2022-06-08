@@ -23,7 +23,7 @@ func main() {
 	fmt.Println(time.Now().UnixNano())
 	if config.Cfg.ServiceMode {
 		router := NewRouter()
-		log.Fatal(http.ListenAndServe(":8080", router))
+		log.Fatal(http.ListenAndServe(":8081", router))
 	} else {
 		processMessages()
 	}
@@ -46,4 +46,9 @@ func execCmdBash(dfCmd string) (string, error) {
 	}
 	//fmt.Println(string(stdout))
 	return string(stdout), nil
+}
+
+func finishMessage(msg Message) {
+	timetaken := time.Since(time.UnixMicro(msg.StartTime))
+	fmt.Printf("Message id %d took %d ms\n", msg.MessageId, timetaken.Microseconds()/1000.0)
 }

@@ -70,6 +70,7 @@ func convertToDeployments(inputYamlFile string) {
 		}
 
 		nodeConfigs[nodeInfo.Name] = NodeConfig{
+			NodeName:        nodeInfo.Name,
 			SubnetBridgeIPs: subnets,
 			IPRouteMap:      routeMap(nodeInfo, exp.Nodes),
 			NumServices:     len(nodeInfo.Services),
@@ -77,6 +78,11 @@ func convertToDeployments(inputYamlFile string) {
 
 		nodesvcs := []corev1.Pod{}
 		for _, podInfo := range nodeInfo.Services {
+			args := []string{"defaultconfig.json", nodeInfo.Name}
+			addresses := getNextAddresses(podInfo, exp.Links)
+			for _, address := range addresses {
+				args = append(args, address)
+			}
 			pod := corev1.Pod{
 				ObjectMeta: v1.ObjectMeta{
 					Name:      podInfo.Name,
@@ -95,7 +101,7 @@ func convertToDeployments(inputYamlFile string) {
 							Image:           podInfo.Image,
 							ImagePullPolicy: corev1.PullIfNotPresent,
 							Command:         []string{"./service"},
-							Args:            getNextAddresses(podInfo, exp.Links),
+							Args:            args,
 							Resources: corev1.ResourceRequirements{
 								Limits: corev1.ResourceList{
 									corev1.ResourceCPU:    resource.MustParse(podInfo.Cpu),
@@ -186,6 +192,7 @@ func IPStringToInt(ipStr string) (int, error) {
 }
 
 type NodeConfig struct {
+	NodeName        string
 	SubnetBridgeIPs map[string]string
 	IPRouteMap      map[string]string
 	NumServices     int

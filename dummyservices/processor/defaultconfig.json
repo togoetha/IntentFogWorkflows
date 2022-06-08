@@ -1,9 +1,6 @@
 {
-	"serviceMode": "true",
-	"mqttPort": 1883,
-	"mqttBroker": "ssl://todo:1883",
-	"mqttReadTopic": "TODO",
-	"mqttWriteTopic": "TODO",
-	"mqttClientId": "papers",
-	"mqttUser": "rfun"
+	"payloadSize": 200,
+	"serviceMode": true,
+	"pushServiceURL": "http://%s:8081/process",
+	"defaultWorkloadSize": 10000
 }

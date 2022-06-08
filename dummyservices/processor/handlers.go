@@ -3,7 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"log"
+	"fmt"
 	"net/http"
 	"processor/config"
 )
@@ -16,8 +16,8 @@ func ProcessMessage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	go func() {
-		bubbleSort(message.SortSize)
-		sendNextRESTMessage(message.MessageId)
+		bubbleSort(config.Cfg.DefaultWorkloadSize)
+		sendNextRESTMessage(message.MessageId, message.StartTime)
 	}()
 }
 
@@ -37,16 +37,19 @@ func bubbleSort(n int) []int {
 	return numbers
 }
 
-func sendNextRESTMessage(id int) {
+func sendNextRESTMessage(id int, time int64) {
 	data := generateMessage(config.Cfg.PayloadSize)
-	data.SortSize = config.Cfg.DefaultWorkloadSize
 	data.MessageId = id
+	data.StartTime = time
 	jsonData, err := json.Marshal(data)
 
-	_, err = http.Post(config.Cfg.PushServiceURL, "application/json",
-		bytes.NewBuffer(jsonData))
+	for _, targetIP := range TargetIPs {
+		serviceUrl := fmt.Sprintf(config.Cfg.PushServiceURL, targetIP)
+		_, err = http.Post(serviceUrl, "application/json",
+			bytes.NewBuffer(jsonData))
 
-	if err != nil {
-		log.Fatal(err)
+		if err != nil {
+			fmt.Printf("Failed to write to service %s\n", serviceUrl)
+		}
 	}
 }
