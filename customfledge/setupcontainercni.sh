@@ -46,7 +46,7 @@ ip netns exec $containername ip link delete $cniif
 #link cniif, add it to the right namespace and add a route 
 ip link set $cniif netns $containername
 ip netns exec $containername ip link set $cniif up
-ip netns exec $containername ip route replace default via $gwip dev $cniif 
+#ip netns exec $containername ip route replace default via $gwip dev $cniif 
 
 #echo ${1}
 #while [[ -z "${1}" ]] 
