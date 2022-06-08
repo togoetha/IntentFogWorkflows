@@ -54,7 +54,7 @@ func BindNetNamespace(namespace string, pod string, pid int, bandwidth int64, la
 			}
 
 			parts := strings.Split(ips[0], ".")
-			route := fmt.Sprintf("%s.%s.%s.0/%s", parts[0], parts[1], parts[2], subnet)
+			route := fmt.Sprintf("%s.%s.%s.0/%s", parts[0], parts[1], parts[2], subnetMask)
 			cmd = fmt.Sprintf("ip netns exec %s ip route replace %s via %s dev %s", netNs, route, gwip, cniif)
 			utils.ExecCmdBash(cmd)
 		}
