@@ -38,16 +38,16 @@ func generate() {
 	id := 1
 	//running = true
 
-	loglines := []string{}
+	//loglines := []string{}
 	for i := 0; i < config.Cfg.Messages; i++ {
 		go func() {
 			message := generateMessage(config.Cfg.PayloadSize)
 			message.MessageId = id
-			message.StartTime = time.Now().UnixMicro()
+			message.StartTime = []int64{time.Now().UnixMicro()}
 			//message.SortSize = config.Cfg.DefaultWorkloadSize
 
 			if config.Cfg.ServiceMode {
-				loglines = append(loglines, sendRESTMessage(message))
+				sendRESTMessage(message)
 			} else {
 				sendMqttMessage(message)
 			}
@@ -56,7 +56,7 @@ func generate() {
 		id++
 		time.Sleep(time.Duration(frequency) * time.Millisecond)
 	}
-	f, err := os.OpenFile("/usr/bin/output.txt", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0666)
+	/*f, err := os.OpenFile("/usr/bin/output.txt", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
 		panic(err)
 	}
@@ -66,11 +66,11 @@ func generate() {
 		if _, err = f.WriteString(logline); err != nil {
 			panic(err)
 		}
-	}
+	}*/
 }
 
 func execCmdBash(dfCmd string) (string, error) {
-	fmt.Printf("Executing %s\n", dfCmd)
+	log(fmt.Sprintf("Executing %s\n", dfCmd))
 	cmd := exec.Command("sh", "-c", dfCmd)
 	stdout, err := cmd.Output()
 
@@ -83,57 +83,48 @@ func execCmdBash(dfCmd string) (string, error) {
 }
 
 func sendRESTMessage(message Message) string {
+	message.History = []string{InstanceName}
 	jsonData, err := json.Marshal(message)
-
+	//fmt.Println(string(jsonData))
 	for _, targetIP := range TargetIPs {
 		go func(targetIP string) {
-			message.History = []string{targetIP}
 			serviceUrl := fmt.Sprintf(config.Cfg.PushServiceURL, targetIP)
 			_, err = http.Post(serviceUrl, "application/json",
 				bytes.NewBuffer(jsonData))
 
 			if err != nil {
-				fmt.Printf("Failed to write to service %s\n", serviceUrl)
+				log(fmt.Sprintf("Failed to write to service %s\n", serviceUrl))
 			}
 		}(targetIP)
 	}
 
-	logline := fmt.Sprintf("Message id %d sent at %d\n", message.MessageId, message.StartTime)
-	/*fmt.Println(logline)
-	f, err := os.OpenFile("/usr/bin/output.txt", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0666)
-	if err != nil {
-		panic(err)
-	}
+	log(fmt.Sprintf("Message id %d sent at %d\n", message.MessageId, message.StartTime))
 
-	defer f.Close()
-	if _, err = f.WriteString(logline); err != nil {
-		panic(err)
-	}*/
-	return logline
+	return "" //logline
 }
 
 func sendMqttMessage(message Message) {
-	fmt.Println("Sending content to MQTT")
+	log("Sending content to MQTT")
 	client := *getClient()
 	if token := client.Connect(); token.Wait() && token.Error() != nil {
-		fmt.Println("Connect fucked")
-		fmt.Println(token.Error())
+		log("Connect failed")
+		log(token.Error().Error())
 	}
 
 	payload, err := json.Marshal(message)
 	if err != nil {
-		fmt.Println(err.Error())
+		log(err.Error())
 	}
 
-	fmt.Println("Publishing")
+	log("Publishing")
 	token := client.Publish(config.Cfg.MqttTopicWrite, 0, false, payload)
 	token.Wait()
 	if token.Error() != nil {
-		fmt.Println("Publish fucked")
-		fmt.Println(token.Error())
+		log("Publish failed")
+		log(token.Error().Error())
 	}
 
-	fmt.Println("Published")
+	log("Published")
 	client.Disconnect(250)
 }
 
@@ -150,8 +141,20 @@ func getClient() *mqtt.Client {
 	opts.SetUsername(config.Cfg.MqttUser)
 	opts.SetPassword(config.Cfg.MqttPass) //flexnet
 
-	fmt.Printf("Connecting to %s\n", config.Cfg.MqttBroker)
+	log(fmt.Sprintf("Connecting to %s\n", config.Cfg.MqttBroker))
 
 	client := mqtt.NewClient(opts)
 	return &client
+}
+
+func log(line string) {
+	f, err := os.OpenFile("/usr/bin/output.txt", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0666)
+	if err != nil {
+		panic(err)
+	}
+
+	defer f.Close()
+	if _, err = f.WriteString(line); err != nil {
+		panic(err)
+	}
 }

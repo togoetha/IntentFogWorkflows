@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"processor/config"
+	"time"
 )
 
 func ProcessMessage(w http.ResponseWriter, r *http.Request) {
@@ -16,7 +17,9 @@ func ProcessMessage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	go func(message Message) {
+		start := time.Now()
 		bubbleSort(config.Cfg.DefaultWorkloadSize)
+		logger(fmt.Sprintf("Bubble sort for %d took %dms", message.MessageId, time.Since(start).Milliseconds()))
 		sendNextRESTMessage(message.MessageId, message.StartTime, message.History)
 	}(message)
 }
@@ -37,21 +40,21 @@ func bubbleSort(n int) []int {
 	return numbers
 }
 
-func sendNextRESTMessage(id int, time int64, history []string) {
+func sendNextRESTMessage(id int, times []int64, history []string) {
 	data := generateMessage(config.Cfg.PayloadSize)
 	data.MessageId = id
-	data.StartTime = time
+	data.History = append(history, InstanceName)
+	data.StartTime = append(times, time.Now().UnixMicro())
 	jsonData, err := json.Marshal(data)
 
 	for _, targetIP := range TargetIPs {
 		go func(targetIP string) {
-			data.History = append(history, targetIP)
 			serviceUrl := fmt.Sprintf(config.Cfg.PushServiceURL, targetIP)
 			_, err = http.Post(serviceUrl, "application/json",
 				bytes.NewBuffer(jsonData))
 
 			if err != nil {
-				fmt.Printf("Failed to write to service %s\n", serviceUrl)
+				logger(fmt.Sprintf("Failed to write to service %s\n", serviceUrl))
 			}
 		}(targetIP)
 	}

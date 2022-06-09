@@ -44,7 +44,7 @@ func handleMessage(client mqtt.Client, message mqtt.Message) {
 
 	go func() {
 		bubbleSort(config.Cfg.DefaultWorkloadSize)
-		sendNextMqttMessage(msg.MessageId, msg.StartTime)
+		sendNextMqttMessage(msg.MessageId, msg.StartTime[0])
 	}()
 }
 
@@ -57,7 +57,7 @@ func sendNextMqttMessage(id int, time int64) {
 	}
 
 	data := generateMessage(config.Cfg.PayloadSize)
-	data.StartTime = time
+	data.StartTime = []int64{time}
 	data.MessageId = id
 
 	payload, err := json.Marshal(data)

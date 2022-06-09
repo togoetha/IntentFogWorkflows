@@ -8,7 +8,6 @@ import (
 	"os"
 	"os/exec"
 	"processor/config"
-	"time"
 )
 
 var InstanceName string
@@ -25,7 +24,7 @@ func main() {
 
 	config.LoadConfig(cfgFile)
 
-	fmt.Println(time.Now().UnixNano())
+	//fmt.Println(time.Now().UnixNano())
 	if config.Cfg.ServiceMode {
 		router := NewRouter()
 		log.Fatal(http.ListenAndServe(":8080", router))
@@ -41,7 +40,7 @@ func getTlsConfig() *tls.Config {
 }
 
 func execCmdBash(dfCmd string) (string, error) {
-	fmt.Printf("Executing %s\n", dfCmd)
+	logger(fmt.Sprintf("Executing %s\n", dfCmd))
 	cmd := exec.Command("sh", "-c", dfCmd)
 	stdout, err := cmd.Output()
 
@@ -51,4 +50,16 @@ func execCmdBash(dfCmd string) (string, error) {
 	}
 	//fmt.Println(string(stdout))
 	return string(stdout), nil
+}
+
+func logger(line string) {
+	f, err := os.OpenFile("/usr/bin/output.txt", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0666)
+	if err != nil {
+		panic(err)
+	}
+
+	defer f.Close()
+	if _, err = f.WriteString(line); err != nil {
+		panic(err)
+	}
 }
