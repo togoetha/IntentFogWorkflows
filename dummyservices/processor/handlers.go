@@ -15,10 +15,10 @@ func ProcessMessage(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 
-	go func() {
+	go func(message Message) {
 		bubbleSort(config.Cfg.DefaultWorkloadSize)
-		sendNextRESTMessage(message.MessageId, message.StartTime)
-	}()
+		sendNextRESTMessage(message.MessageId, message.StartTime, message.History)
+	}(message)
 }
 
 func bubbleSort(n int) []int {
@@ -37,19 +37,22 @@ func bubbleSort(n int) []int {
 	return numbers
 }
 
-func sendNextRESTMessage(id int, time int64) {
+func sendNextRESTMessage(id int, time int64, history []string) {
 	data := generateMessage(config.Cfg.PayloadSize)
 	data.MessageId = id
 	data.StartTime = time
 	jsonData, err := json.Marshal(data)
 
 	for _, targetIP := range TargetIPs {
-		serviceUrl := fmt.Sprintf(config.Cfg.PushServiceURL, targetIP)
-		_, err = http.Post(serviceUrl, "application/json",
-			bytes.NewBuffer(jsonData))
+		go func(targetIP string) {
+			data.History = append(history, targetIP)
+			serviceUrl := fmt.Sprintf(config.Cfg.PushServiceURL, targetIP)
+			_, err = http.Post(serviceUrl, "application/json",
+				bytes.NewBuffer(jsonData))
 
-		if err != nil {
-			fmt.Printf("Failed to write to service %s\n", serviceUrl)
-		}
+			if err != nil {
+				fmt.Printf("Failed to write to service %s\n", serviceUrl)
+			}
+		}(targetIP)
 	}
 }

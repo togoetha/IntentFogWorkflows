@@ -8,8 +8,11 @@ import (
 	"os"
 	"os/exec"
 	"sink/config"
+	"strings"
 	"time"
 )
+
+var loglines []string
 
 func main() {
 	argsWithoutProg := os.Args[1:]
@@ -18,6 +21,7 @@ func main() {
 		cfgFile = argsWithoutProg[0]
 	}
 
+	loglines = []string{}
 	config.LoadConfig(cfgFile)
 
 	now := time.Now().UnixMicro()
@@ -55,15 +59,23 @@ func execCmdBash(dfCmd string) (string, error) {
 
 func finishMessage(msg Message) {
 	timetaken := time.Since(time.UnixMicro(msg.StartTime))
-	logline := fmt.Sprintf("Message id %d took %d ms\n", msg.MessageId, timetaken.Microseconds()/1000.0)
-	fmt.Println(logline)
-	f, err := os.OpenFile("/usr/bin/output.txt", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0666)
-	if err != nil {
-		panic(err)
-	}
+	now := time.Now().UnixMicro()
+	logline := fmt.Sprintf("Message id %d start %d now %d took %d ms chain %s\n", msg.MessageId, msg.StartTime, now, timetaken.Microseconds()/1000.0, strings.Join(msg.History, ">"))
+	//fmt.Println(logline)
+	loglines = append(loglines, logline)
 
-	defer f.Close()
-	if _, err = f.WriteString(logline); err != nil {
-		panic(err)
+	if len(loglines) == 1000 {
+		f, err := os.OpenFile("/usr/bin/output.txt", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0666)
+		if err != nil {
+			panic(err)
+		}
+
+		for _, logline := range loglines {
+			if _, err = f.WriteString(logline); err != nil {
+				panic(err)
+			}
+		}
+		f.Close()
+		loglines = []string{}
 	}
 }

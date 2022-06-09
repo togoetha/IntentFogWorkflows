@@ -1,7 +1,7 @@
 #!/bin/bash -v
 
 if [[ -z "${6:-}" ]]; then
-  echo "Use: setupcontainercni.sh containername pid cniif gwip subnetsize bandwidth latency containerip" 1>&2
+  echo "Use: setupcontainercni.sh containername pid cniif gwip subnetsize bandwidth latency" 1>&2
   exit 1
 fi
 
@@ -18,8 +18,6 @@ shift
 bandwidth=${1}
 shift
 latency=${1}
-shift
-containerip=${1}
 
 #create netns folder if it doesn't exist (it should, mounted by Docker)
 #soft link the process to the container's network namespace
@@ -34,7 +32,7 @@ hostif="veth$rand"
 ip link add $cniif type veth peer name $hostif 
 
 #tc qdisc add dev $cniif root tbf rate $bandwidth burst 250000 latency 1ms 
-tc qdisc add dev $cniif root netem rate $bandwidth delay $latency 
+tc qdisc add dev $cniif root netem rate $bandwidth #delay $latency 
 
 #link $hostif to cni0
 ip link set $hostif up 

@@ -38,6 +38,7 @@ func generate() {
 	id := 1
 	//running = true
 
+	loglines := []string{}
 	for i := 0; i < config.Cfg.Messages; i++ {
 		go func() {
 			message := generateMessage(config.Cfg.PayloadSize)
@@ -46,7 +47,7 @@ func generate() {
 			//message.SortSize = config.Cfg.DefaultWorkloadSize
 
 			if config.Cfg.ServiceMode {
-				sendRESTMessage(message)
+				loglines = append(loglines, sendRESTMessage(message))
 			} else {
 				sendMqttMessage(message)
 			}
@@ -54,6 +55,17 @@ func generate() {
 
 		id++
 		time.Sleep(time.Duration(frequency) * time.Millisecond)
+	}
+	f, err := os.OpenFile("/usr/bin/output.txt", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0666)
+	if err != nil {
+		panic(err)
+	}
+
+	defer f.Close()
+	for _, logline := range loglines {
+		if _, err = f.WriteString(logline); err != nil {
+			panic(err)
+		}
 	}
 }
 
@@ -70,21 +82,24 @@ func execCmdBash(dfCmd string) (string, error) {
 	return string(stdout), nil
 }
 
-func sendRESTMessage(message Message) {
+func sendRESTMessage(message Message) string {
 	jsonData, err := json.Marshal(message)
 
 	for _, targetIP := range TargetIPs {
-		serviceUrl := fmt.Sprintf(config.Cfg.PushServiceURL, targetIP)
-		_, err = http.Post(serviceUrl, "application/json",
-			bytes.NewBuffer(jsonData))
+		go func(targetIP string) {
+			message.History = []string{targetIP}
+			serviceUrl := fmt.Sprintf(config.Cfg.PushServiceURL, targetIP)
+			_, err = http.Post(serviceUrl, "application/json",
+				bytes.NewBuffer(jsonData))
 
-		if err != nil {
-			fmt.Printf("Failed to write to service %s\n", serviceUrl)
-		}
+			if err != nil {
+				fmt.Printf("Failed to write to service %s\n", serviceUrl)
+			}
+		}(targetIP)
 	}
 
-	logline := fmt.Sprintf("Message id %d sent\n", message.MessageId)
-	fmt.Println(logline)
+	logline := fmt.Sprintf("Message id %d sent at %d\n", message.MessageId, message.StartTime)
+	/*fmt.Println(logline)
 	f, err := os.OpenFile("/usr/bin/output.txt", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
 		panic(err)
@@ -93,7 +108,8 @@ func sendRESTMessage(message Message) {
 	defer f.Close()
 	if _, err = f.WriteString(logline); err != nil {
 		panic(err)
-	}
+	}*/
+	return logline
 }
 
 func sendMqttMessage(message Message) {
