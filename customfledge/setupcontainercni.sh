@@ -32,7 +32,7 @@ hostif="veth$rand"
 ip link add $cniif type veth peer name $hostif 
 
 #tc qdisc add dev $cniif root tbf rate $bandwidth burst 250000 latency 1ms 
-#tc qdisc add dev $cniif root netem rate $bandwidth #delay $latency 
+tc qdisc add dev $cniif root netem rate $bandwidth #delay $latency 
 
 #link $hostif to cni0
 ip link set $hostif up 
@@ -45,7 +45,7 @@ ip netns exec $containername ip link delete $cniif
 #link cniif, add it to the right namespace and add a route 
 ip link set $cniif netns $containername
 ip netns exec $containername ip link set $cniif up
-#ip netns exec $containername ip route replace default via $gwip dev $cniif 
+ip netns exec $containername ip route replace default via $gwip dev $cniif 
 
 #echo ${1}
 #while [[ -z "${1}" ]] 
