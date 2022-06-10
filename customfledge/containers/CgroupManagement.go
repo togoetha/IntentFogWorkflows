@@ -29,6 +29,7 @@ func CreateCgroupIfNotExists(namespace string, podname string, container string)
 }
 
 func CreateCgroup(cgName string) {
+	fmt.Println("CreateCgroup")
 	//cmd := fmt.Sprintf("cgcreate -g memory,cpu:vkubelet/%s", cgName)
 	//utils.ExecCmdBash(cmd)
 	/*cmd := fmt.Sprintf("mkdir -p /sys/fs/cgroup/memory/%s", cgName)
@@ -37,14 +38,15 @@ func CreateCgroup(cgName string) {
 	utils.ExecCmdBash(cmd)*/
 	newGroup, err := MainGroup.New(cgName, &specs.LinuxResources{})
 	if err != nil {
-
+		fmt.Println("Error creating new group")
 	}
 	Cgroups[cgName] = &newGroup
 }
 
 func CgroupExists(cgName string) bool {
-	val, exists := Cgroups[cgName]
-	return exists || val == nil
+	fmt.Println("CgroupExists")
+	//val, exists := Cgroups[cgName]
+	//return exists || val == nil
 
 	//cmd := fmt.Sprintf("cgget -g memory:vkubelet/%s", cgName)
 	//cmd := fmt.Sprintf("cat /sys/fs/cgroup/memory/%s/memory.limit_in_bytes", cgName)
@@ -54,6 +56,7 @@ func CgroupExists(cgName string) bool {
 }
 
 func DeleteCgroup(cgName string) {
+	fmt.Println("DeleteCgroup")
 	//cmd := fmt.Sprintf("cgdelete memory,cpu:vkubelet/%s", cgName)
 	//cmd := fmt.Sprintf("rmdir /sys/fs/cgroup/memory/%s", cgName)
 	//utils.ExecCmdBash(cmd)
@@ -65,6 +68,7 @@ func DeleteCgroup(cgName string) {
 }
 
 func SetMemoryLimit(cgName string, limit int64) {
+	fmt.Println("SetMemoryLimit")
 	//cmd := fmt.Sprintf("echo %d > /sys/fs/cgroup/memory/%s/memory.limit_in_bytes", limit, cgName)
 	//cmd := fmt.Sprintf("cgset -r memory.limit_in_bytes=%d vkubelet/%s", limit, cgName)
 	//utils.ExecCmdBash(cmd)
@@ -79,6 +83,7 @@ func SetMemoryLimit(cgName string, limit int64) {
 }
 
 func SetCpuLimit(cgName string, cpus float64) {
+	fmt.Println("SetCPULimit")
 	//cpu.cfs_period_us=100000
 	//cpu.cfs_quota=100000 * cpus?
 	//cmd := fmt.Sprintf("echo %d > /sys/fs/cgroup/cpu/%s/cpu.cfs_period_us", 100000, cgName)
@@ -101,6 +106,7 @@ func SetCpuLimit(cgName string, cpus float64) {
 }
 
 func MovePid(cgName string, pid uint64) {
+	fmt.Println("MovePID")
 	//cmd := fmt.Sprintf("cgclassify -g memory,cpu:vkubelet/%s %d", cgName, pid)
 	//utils.ExecCmdBash(cmd)
 	cgroup := *Cgroups[cgName]
