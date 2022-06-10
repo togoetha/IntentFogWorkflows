@@ -13,12 +13,16 @@ import (
 )
 
 var loglines []string
+var InstanceName string
 
 func main() {
 	argsWithoutProg := os.Args[1:]
 	cfgFile := "defaultconfig.json"
+	InstanceName = "sink"
+
 	if len(argsWithoutProg) > 0 {
 		cfgFile = argsWithoutProg[0]
+		InstanceName = argsWithoutProg[1]
 	}
 
 	loglines = []string{}
@@ -52,9 +56,19 @@ func execCmdBash(dfCmd string) (string, error) {
 }
 
 func finishMessage(msg Message) {
-	timetaken := time.Since(time.UnixMicro(msg.StartTime))
-	now := time.Now().UnixMicro()
-	logline := fmt.Sprintf("Message id %d start %d now %d took %d ms chain %s\n", msg.MessageId, msg.StartTime, now, timetaken.Microseconds()/1000.0, strings.Join(msg.History, ">"))
+	totalTime := time.Since(time.UnixMicro(msg.Hops[0].ExitTime))
+	//now := time.Now().UnixMicro()
+	strTimes := []string{}
+	for idx, hop := range msg.Hops {
+		if idx == 0 {
+			strTimes = append(strTimes, fmt.Sprintf("%s;;", hop.NodeId)) //append(strTimes, fmt.Sprintf("%s, %d", hop.NodeId, hop.ExitTime))
+		} else if idx == len(msg.Hops)-1 {
+			strTimes = append(strTimes, fmt.Sprintf("%s;%f;%f", hop.NodeId, float32(hop.EntryTime-msg.Hops[idx-1].ExitTime)/1000.0, 0.0)) //fmt.Sprintf("-> %fms -> %s, %d", float32(hop.EntryTime-msg.Hops[idx-1].ExitTime)/1000.0, hop.NodeId, hop.EntryTime))
+		} else {
+			strTimes = append(strTimes, fmt.Sprintf("%s;%f;%f", hop.NodeId, float32(hop.EntryTime-msg.Hops[idx-1].ExitTime)/1000.0, float32(hop.ExitTime-hop.EntryTime)/1000.0)) //fmt.Sprintf("-> %fms -> %s, %d to %d, %fms processing", float32(hop.EntryTime-msg.Hops[idx-1].ExitTime)/1000.0, hop.NodeId, hop.EntryTime, hop.ExitTime, float32(hop.ExitTime-hop.EntryTime)/1000.0))
+		}
+	}
+	logline := fmt.Sprintf("%s;%f;%s\n", msg.MessageId, float32(totalTime.Microseconds())/1000.0, strings.Join(strTimes, " ")) //fmt.Sprintf("Message id %d took %fms chain %s\n", msg.MessageId, float32(totalTime.Microseconds())/1000.0, strings.Join(strTimes, " "))
 	//fmt.Println(logline)
 	loglines = append(loglines, logline)
 
@@ -64,6 +78,7 @@ func finishMessage(msg Message) {
 			panic(err)
 		}
 
+		f.WriteString("MessageId;TotalTime;Hop1;HopLatency1;HopProcessing1\n")
 		for _, logline := range loglines {
 			if _, err = f.WriteString(logline); err != nil {
 				panic(err)

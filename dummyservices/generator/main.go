@@ -20,6 +20,8 @@ var TargetIPs []string
 func main() {
 	argsWithoutProg := os.Args[1:]
 	cfgFile := "defaultconfig.json"
+	InstanceName = "generator"
+	TargetIPs = []string{"127.0.0.1"}
 	if len(argsWithoutProg) > 0 {
 		cfgFile = argsWithoutProg[0]
 		InstanceName = argsWithoutProg[1]
@@ -37,13 +39,23 @@ func generate() {
 	frequency := 1000 / config.Cfg.MessageFrequency
 	id := 1
 	//running = true
+	message := generateMessage(config.Cfg.PayloadSize)
+	message.MessageId = "Test1000000"
+	message.Workload = config.Cfg.DefaultWorkloadSize
+	message.Hops = []NodeData{{NodeId: InstanceName, ExitTime: time.Now().UnixMicro()}}
+	err := sendTestMessage(message)
+	for err != nil {
+		log("Can't reach clients yet, retrying")
+		err = sendTestMessage(message)
+	}
 
 	//loglines := []string{}
 	for i := 0; i < config.Cfg.Messages; i++ {
 		go func() {
 			message := generateMessage(config.Cfg.PayloadSize)
-			message.MessageId = id
-			message.StartTime = []int64{time.Now().UnixMicro()}
+			message.MessageId = fmt.Sprintf("%s%d", InstanceName, id)
+			message.Workload = config.Cfg.DefaultWorkloadSize
+
 			//message.SortSize = config.Cfg.DefaultWorkloadSize
 
 			if config.Cfg.ServiceMode {
@@ -83,12 +95,11 @@ func execCmdBash(dfCmd string) (string, error) {
 }
 
 func sendRESTMessage(message Message) string {
-	message.History = []string{InstanceName}
-	jsonData, err := json.Marshal(message)
-	//fmt.Println(string(jsonData))
 	for _, targetIP := range TargetIPs {
 		go func(targetIP string) {
 			serviceUrl := fmt.Sprintf(config.Cfg.PushServiceURL, targetIP)
+			message.Hops = []NodeData{{NodeId: InstanceName, ExitTime: time.Now().UnixMicro()}}
+			jsonData, err := json.Marshal(message)
 			_, err = http.Post(serviceUrl, "application/json",
 				bytes.NewBuffer(jsonData))
 
@@ -98,9 +109,25 @@ func sendRESTMessage(message Message) string {
 		}(targetIP)
 	}
 
-	log(fmt.Sprintf("Message id %d sent at %d\n", message.MessageId, message.StartTime))
+	log(fmt.Sprintf("Message id %d sent\n", message.MessageId))
 
 	return "" //logline
+}
+
+func sendTestMessage(message Message) error {
+	//message.History = []string{InstanceName}
+	jsonData, err := json.Marshal(message)
+	//fmt.Println(string(jsonData))
+	for _, targetIP := range TargetIPs {
+		serviceUrl := fmt.Sprintf(config.Cfg.PushServiceURL, targetIP)
+		_, err = http.Post(serviceUrl, "application/json",
+			bytes.NewBuffer(jsonData))
+
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func sendMqttMessage(message Message) {

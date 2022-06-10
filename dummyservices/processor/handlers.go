@@ -15,12 +15,13 @@ func ProcessMessage(w http.ResponseWriter, r *http.Request) {
 	if err := decoder.Decode(&message); err != nil {
 		panic(err)
 	}
+	message.Hops = append(message.Hops, NodeData{NodeId: InstanceName, EntryTime: time.Now().UnixMicro()})
 
 	go func(message Message) {
 		start := time.Now()
-		bubbleSort(config.Cfg.DefaultWorkloadSize)
+		bubbleSort(message.Workload)
 		logger(fmt.Sprintf("Bubble sort for %d took %dms", message.MessageId, time.Since(start).Milliseconds()))
-		sendNextRESTMessage(message.MessageId, message.StartTime, message.History)
+		sendNextRESTMessage(message)
 	}(message)
 }
 
@@ -40,16 +41,18 @@ func bubbleSort(n int) []int {
 	return numbers
 }
 
-func sendNextRESTMessage(id int, times []int64, history []string) {
+func sendNextRESTMessage(orig Message) {
 	data := generateMessage(config.Cfg.PayloadSize)
-	data.MessageId = id
-	data.History = append(history, InstanceName)
-	data.StartTime = append(times, time.Now().UnixMicro())
-	jsonData, err := json.Marshal(data)
+	data.MessageId = orig.MessageId
+	data.Payload = orig.Payload
+	data.Workload = orig.Workload
+	data.Hops = orig.Hops
 
 	for _, targetIP := range TargetIPs {
 		go func(targetIP string) {
 			serviceUrl := fmt.Sprintf(config.Cfg.PushServiceURL, targetIP)
+			data.Hops[len(data.Hops)-1].ExitTime = time.Now().UnixMicro()
+			jsonData, err := json.Marshal(data)
 			_, err = http.Post(serviceUrl, "application/json",
 				bytes.NewBuffer(jsonData))
 

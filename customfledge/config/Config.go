@@ -12,6 +12,7 @@ type Config struct {
 	SubnetBridgeIPs map[string]string
 	IPRouteMap      map[string]string
 	NumServices     int
+	Delays          map[string]string
 }
 
 func LoadConfig(filename string) error {

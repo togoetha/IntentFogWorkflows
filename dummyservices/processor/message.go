@@ -5,10 +5,16 @@ import (
 )
 
 type Message struct {
-	History   []string `json:"history"`
-	StartTime []int64  `json:"startTime"`
-	Payload   string   `json:"payload"`
-	MessageId int      `json:"messageId"`
+	Hops      []NodeData `json:"hops"`
+	Workload  int        `json:"workload"`
+	Payload   string     `json:"payload"`
+	MessageId string     `json:"messageId"`
+}
+
+type NodeData struct {
+	NodeId    string `json:"history"`
+	EntryTime int64  `json:"startTime"`
+	ExitTime  int64  `json:"endTime"`
 }
 
 func generateMessage(payloadSize int) Message {

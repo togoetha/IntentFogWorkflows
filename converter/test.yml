@@ -99,8 +99,10 @@ links:
   - name: "wf1_ms5-->user"
     in: ["192.168.199.3/24"]
     out: ["192.168.199.4/24"] #notice this is a subnet not IP, likely this need to change to an ip that represent group of users and there is an access gw behind it that handle individual relationships
-
-
+delays:
+  - from: "10.2.0.94"
+    to: "10.2.0.96"
+    delay: "50ms"
 
 
 

@@ -32,7 +32,11 @@ hostif="veth$rand"
 ip link add $cniif type veth peer name $hostif 
 
 #tc qdisc add dev $cniif root tbf rate $bandwidth burst 250000 latency 1ms 
-tc qdisc add dev $cniif root netem rate $bandwidth #delay $latency 
+if [ -z $latency ]; then
+    echo "tc qdisc add dev $cniif root netem rate $bandwidth"
+else 
+    echo "tc qdisc add dev $cniif root netem rate $bandwidth delay $latency"
+fi
 
 #link $hostif to cni0
 ip link set $hostif up 

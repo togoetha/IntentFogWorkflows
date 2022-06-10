@@ -32,6 +32,25 @@ func InitContainerNetworking() {
 		output, err = utils.ExecCmdBash(cmd)
 		fmt.Println(output)
 	}
+	//init root class on phys ifs for delay per IP
+	configDone := make(map[string]bool)
+
+	counter := 0
+	if config.Cfg.Delays != nil {
+		for extIp, delay := range config.Cfg.Delays {
+			publicIf := GetRouteDev(extIp)
+			_, contains := configDone[publicIf]
+			if !contains {
+				cmd = fmt.Sprintf("sh -x ./setupdelay.sh %s", publicIf)
+			}
+			class := 5 + counter
+			classId := fmt.Sprintf("1:%d", class)
+			handle := 10 * counter
+			cmd = fmt.Sprintf("sh -x ./addipdelay.sh %s %s %s %d %s", publicIf, classId, delay, handle, extIp)
+			counter++
+		}
+	}
+
 	//nodeSubnetsMasks = subnetsMasks
 	//subnetMask, _ = strconv.Atoi(subMask)
 	//baseSubnetIP, _ = IPStringToInt(nodeSubnet)
@@ -50,17 +69,25 @@ func SetupRoutes(ipRouteMap map[string]string) {
 	// ip route add $nodeip/$mask via $routeip dev $extif
 
 	for svcIPMask, publicIP := range config.Cfg.IPRouteMap {
-		cmd := fmt.Sprintf("ip route get %s | grep -E -o '[0-9\\.]* dev [a-z0-9]*'", publicIP)
-		route, err := utils.ExecCmdBash(cmd)
-		routeDev := strings.Split(route, " ")[2]
+		routeDev := GetRouteDev(publicIP)
 
 		svcIP := strings.Split(svcIPMask, "/")[0]
-		cmd = fmt.Sprintf("sh -x ./addroute.sh %s %s %s", svcIP, publicIP, routeDev)
-		_, err = utils.ExecCmdBash(cmd)
+		cmd := fmt.Sprintf("sh -x ./addroute.sh %s %s %s", svcIP, publicIP, routeDev)
+		_, err := utils.ExecCmdBash(cmd)
 		if err != nil {
 			fmt.Printf("Failed to set up route %s to %s\n", publicIP, svcIP)
 		}
 	}
+}
+
+func GetRouteDev(publicIP string) string {
+	cmd := fmt.Sprintf("ip route get %s | grep -E -o '[0-9\\.]* dev [a-z0-9]*'", publicIP)
+	route, err := utils.ExecCmdBash(cmd)
+	if err != nil {
+		fmt.Println("Failed to determine public dev")
+	}
+	routeDev := strings.Split(route, " ")[2]
+	return routeDev
 }
 
 func IPIntToString(ip int) (string, error) {

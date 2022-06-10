@@ -74,6 +74,7 @@ func convertToDeployments(inputYamlFile string) {
 			SubnetBridgeIPs: subnets,
 			IPRouteMap:      routeMap(nodeInfo, exp.Nodes),
 			NumServices:     len(nodeInfo.Services),
+			Delays:          getDelays(nodeInfo, exp.Delays),
 		}
 
 		nodesvcs := []corev1.Pod{}
@@ -137,6 +138,18 @@ func convertToDeployments(inputYamlFile string) {
 	}
 }
 
+func getDelays(local NodeInfo, delays []DelayInfo) map[string]string {
+	delayMap := make(map[string]string)
+
+	for _, delayInfo := range delays {
+		if local.Publicip == delayInfo.From {
+			delayMap[delayInfo.To] = delayInfo.Delay
+		}
+	}
+
+	return delayMap
+}
+
 func routeMap(local NodeInfo, nodes []NodeInfo) map[string]string {
 	routes := make(map[string]string)
 
@@ -196,12 +209,14 @@ type NodeConfig struct {
 	SubnetBridgeIPs map[string]string
 	IPRouteMap      map[string]string
 	NumServices     int
+	Delays          map[string]string
 }
 
 type ExperimentInfo struct {
 	Network []NetworkInfo
 	Nodes   []NodeInfo
 	Links   []LinkInfo
+	Delays  []DelayInfo
 }
 
 type NetworkInfo struct {
@@ -237,4 +252,10 @@ type LinkInfo struct {
 	Name string
 	In   []string
 	Out  []string
+}
+
+type DelayInfo struct {
+	From  string
+	To    string
+	Delay string
 }

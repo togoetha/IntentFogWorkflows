@@ -9,17 +9,17 @@ import (
 var Cfg *Config
 
 type Config struct {
-	PayloadSize         int    `json:"payloadSize"`
-	DefaultWorkloadSize int    `json:"defaultWorkloadSize"`
-	ServiceMode         bool   `json:"serviceMode"`
-	PushServiceURL      string `json:"pushServiceURL"`
-	MqttBroker          string `json:"mqttBroker"`
-	MqttTopicRead       string `json:"mqttTopicRead"`
-	MqttTopicWrite      string `json:"mqttTopicWrite"`
-	MessageTemplate     string `json:"messageTemplate"`
-	MqttClientId        string `json:"mqttClientId"`
-	MqttUser            string `json:"mqttUser"`
-	MqttPass            string `json:"mqttPass"`
+	PayloadSize int `json:"payloadSize"`
+	//DefaultWorkloadSize int    `json:"defaultWorkloadSize"`
+	ServiceMode     bool   `json:"serviceMode"`
+	PushServiceURL  string `json:"pushServiceURL"`
+	MqttBroker      string `json:"mqttBroker"`
+	MqttTopicRead   string `json:"mqttTopicRead"`
+	MqttTopicWrite  string `json:"mqttTopicWrite"`
+	MessageTemplate string `json:"messageTemplate"`
+	MqttClientId    string `json:"mqttClientId"`
+	MqttUser        string `json:"mqttUser"`
+	MqttPass        string `json:"mqttPass"`
 }
 
 func LoadConfig(filename string) error {

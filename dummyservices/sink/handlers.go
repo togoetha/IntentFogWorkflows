@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"net/http"
+	"time"
 )
 
 func ProcessMessage(w http.ResponseWriter, r *http.Request) {
@@ -13,8 +14,8 @@ func ProcessMessage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	go func() {
+		message.Hops = append(message.Hops, NodeData{NodeId: InstanceName, EntryTime: time.Now().UnixMicro()})
 		//bubbleSort(config.Cfg.DefaultWorkload)
-		//sendNextRESTMessage(message.MessageId)
 		finishMessage(message)
 	}()
 }
