@@ -33,4 +33,4 @@ echo \
   $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 
 apt-get update
-apt-get install -y containerd.io
+apt-get install -y containerd.io cgroup-tools
