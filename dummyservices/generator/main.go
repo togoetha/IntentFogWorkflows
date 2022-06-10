@@ -45,7 +45,7 @@ func generate() {
 	message.Hops = []NodeData{{NodeId: InstanceName, ExitTime: time.Now().UnixMicro()}}
 	err := sendTestMessage(message)
 	for err != nil {
-		log("Can't reach clients yet, retrying")
+		log("Can't reach clients yet, retrying\n")
 		err = sendTestMessage(message)
 	}
 

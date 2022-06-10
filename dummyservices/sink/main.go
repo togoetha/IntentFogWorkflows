@@ -68,7 +68,7 @@ func finishMessage(msg Message) {
 			strTimes = append(strTimes, fmt.Sprintf("%s;%f;%f", hop.NodeId, float32(hop.EntryTime-msg.Hops[idx-1].ExitTime)/1000.0, float32(hop.ExitTime-hop.EntryTime)/1000.0)) //fmt.Sprintf("-> %fms -> %s, %d to %d, %fms processing", float32(hop.EntryTime-msg.Hops[idx-1].ExitTime)/1000.0, hop.NodeId, hop.EntryTime, hop.ExitTime, float32(hop.ExitTime-hop.EntryTime)/1000.0))
 		}
 	}
-	logline := fmt.Sprintf("%s;%f;%s\n", msg.MessageId, float32(totalTime.Microseconds())/1000.0, strings.Join(strTimes, " ")) //fmt.Sprintf("Message id %d took %fms chain %s\n", msg.MessageId, float32(totalTime.Microseconds())/1000.0, strings.Join(strTimes, " "))
+	logline := fmt.Sprintf("%s;%f;%s\n", msg.MessageId, float32(totalTime.Microseconds())/1000.0, strings.Join(strTimes, ";")) //fmt.Sprintf("Message id %d took %fms chain %s\n", msg.MessageId, float32(totalTime.Microseconds())/1000.0, strings.Join(strTimes, " "))
 	//fmt.Println(logline)
 	loglines = append(loglines, logline)
 

@@ -13,14 +13,16 @@ func ProcessMessage(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	var message Message
 	if err := decoder.Decode(&message); err != nil {
-		panic(err)
+		//panic(err)
+		logger(err.Error())
+		return
 	}
 	message.Hops = append(message.Hops, NodeData{NodeId: InstanceName, EntryTime: time.Now().UnixMicro()})
 
 	go func(message Message) {
 		start := time.Now()
 		bubbleSort(message.Workload)
-		logger(fmt.Sprintf("Bubble sort for %d took %dms", message.MessageId, time.Since(start).Milliseconds()))
+		logger(fmt.Sprintf("Bubble sort for %s took %dms\n", message.MessageId, time.Since(start).Milliseconds()))
 		sendNextRESTMessage(message)
 	}(message)
 }

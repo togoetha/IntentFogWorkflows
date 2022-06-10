@@ -5,6 +5,14 @@ import (
 	"fmt"
 )
 
+//var MainGroup cgroups.Cgroup
+//var Cgroups map[string]*cgroups.Cgroup
+
+func Init() {
+	//MainGroup, _ = cgroups.New(cgroups.V1, cgroups.StaticPath("/vkubelet"), &specs.LinuxResources{})
+	//Cgroups = make(map[string]*cgroups.Cgroup)
+}
+
 func GetCgroup(namespace string, podname string, container string) string {
 	cgName := fmt.Sprintf("vkubelet/%s-%s-%s", namespace, podname, container)
 	return cgName
@@ -19,41 +27,53 @@ func CreateCgroupIfNotExists(namespace string, podname string, container string)
 }
 
 func CreateCgroup(cgName string) {
-	//cmd := fmt.Sprintf("cgcreate -g memory,cpu:vkubelet/%s", cgName)
-	cmd := fmt.Sprintf("mkdir -p /sys/fs/cgroup/memory/%s", cgName)
+	cmd := fmt.Sprintf("cgcreate -g memory,cpu:vkubelet/%s", cgName)
+	utils.ExecCmdBash(cmd)
+	/*cmd := fmt.Sprintf("mkdir -p /sys/fs/cgroup/memory/%s", cgName)
 	utils.ExecCmdBash(cmd)
 	cmd = fmt.Sprintf("mkdir -p /sys/fs/cgroup/cpu/%s", cgName)
-	utils.ExecCmdBash(cmd)
+	utils.ExecCmdBash(cmd)*/
+	/*newGroup, err := MainGroup.New(cgName, &specs.LinuxResources{})
+	if err != nil {
+
+	}
+	Cgroups[cgName] = &newGroup*/
 }
 
 func CgroupExists(cgName string) bool {
-	//cmd := fmt.Sprintf("cgget -g memory:vkubelet/%s", cgName)
-	cmd := fmt.Sprintf("cat /sys/fs/cgroup/memory/%s/memory.limit_in_bytes", cgName)
+	//val, exists := Cgroups[cgName]
+	//return exists || val == nil
+
+	cmd := fmt.Sprintf("cgget -g memory:vkubelet/%s", cgName)
+	//cmd := fmt.Sprintf("cat /sys/fs/cgroup/memory/%s/memory.limit_in_bytes", cgName)
 	_, err := utils.ExecCmdBash(cmd)
 	return err == nil
 }
 
 func DeleteCgroup(cgName string) {
-	//cmd := fmt.Sprintf("cgdelete memory,cpu:vkubelet/%s", cgName)
-	cmd := fmt.Sprintf("rmdir /sys/fs/cgroup/memory/%s", cgName)
+	cmd := fmt.Sprintf("cgdelete memory,cpu:vkubelet/%s", cgName)
+	//cmd := fmt.Sprintf("rmdir /sys/fs/cgroup/memory/%s", cgName)
 	utils.ExecCmdBash(cmd)
-	cmd = fmt.Sprintf("rmdir /sys/fs/cgroup/cpu/%s", cgName)
-	utils.ExecCmdBash(cmd)
+	//cmd = fmt.Sprintf("rmdir /sys/fs/cgroup/cpu/%s", cgName)
+	//utils.ExecCmdBash(cmd)
+	/*group := Cgroups[cgName]
+	(*group).Delete()
+	Cgroups[cgName] = nil*/
 }
 
 func SetMemoryLimit(cgName string, limit int64) {
-	cmd := fmt.Sprintf("echo %d > /sys/fs/cgroup/memory/%s/memory.limit_in_bytes", limit, cgName)
-	//cmd := fmt.Sprintf("cgset -r memory.limit_in_bytes=%d %s", limit, cgName)
+	//cmd := fmt.Sprintf("echo %d > /sys/fs/cgroup/memory/%s/memory.limit_in_bytes", limit, cgName)
+	cmd := fmt.Sprintf("cgset -r memory.limit_in_bytes=%d %s", limit, cgName)
 	utils.ExecCmdBash(cmd)
 }
 
 func SetCpuLimit(cgName string, cpus float64) {
 	//cpu.cfs_period_us=100000
 	//cpu.cfs_quota=100000 * cpus?
-	cmd := fmt.Sprintf("echo %d > /sys/fs/cgroup/cpu/%s/cpu.cfs_period_us", 100000, cgName)
-	//cmd := fmt.Sprintf("cgset -r cpu.cfs_period_us=%d %s", 100000, cgName)
+	//cmd := fmt.Sprintf("echo %d > /sys/fs/cgroup/cpu/%s/cpu.cfs_period_us", 100000, cgName)
+	cmd := fmt.Sprintf("cgset -r cpu.cfs_period_us=%d %s", 100000, cgName)
 	utils.ExecCmdBash(cmd)
-	cmd = fmt.Sprintf("echo %d > /sys/fs/cgroup/cpu/%s/cpu.cfs_quota_us", int64(100000*cpus), cgName)
-	//cmd = fmt.Sprintf("cgset -r cpu.cfs_quota_us=%d %s", int64(100000*cpus), cgName)
+	//cmd = fmt.Sprintf("echo %d > /sys/fs/cgroup/cpu/%s/cpu.cfs_quota_us", int64(100000*cpus), cgName)
+	cmd = fmt.Sprintf("cgset -r cpu.cfs_quota_us=%d %s", int64(100000*cpus), cgName)
 	utils.ExecCmdBash(cmd)
 }
