@@ -291,7 +291,7 @@ func (dri *ContainerdRuntimeInterface) DeployContainer(namespace string, pod *v1
 	fmt.Println("Task started")
 
 	//NET: trying to fix the net namespace here
-	dri.SetupPodIPs(pod, task)
+	dri.SetupPodIPs(pod, task, dc.Name)
 
 	dri.containerNameTaskMapping[fullName] = PodContainer{
 		podName:   pod.ObjectMeta.Name,
@@ -302,7 +302,7 @@ func (dri *ContainerdRuntimeInterface) DeployContainer(namespace string, pod *v1
 	return task.ID(), nil
 }
 
-func (dri *ContainerdRuntimeInterface) SetupPodIPs(pod *v1.Pod, task containerd.Task) {
+func (dri *ContainerdRuntimeInterface) SetupPodIPs(pod *v1.Pod, task containerd.Task, containerName string) {
 	pod.Status.HostIP = "" //config.Cfg.DeviceIP
 	if pod.Status.PodIP == "" {
 		if pod.Spec.HostNetwork {
@@ -311,6 +311,13 @@ func (dri *ContainerdRuntimeInterface) SetupPodIPs(pod *v1.Pod, task containerd.
 			pids, _ := task.Pids(dri.ctx)
 			pidJson, _ := json.Marshal(pids)
 			fmt.Printf("Container pids %s", string(pidJson))
+
+			//MAKE SURE THE DAMN ASS CGROUPS ARE SET
+			cgroup := GetCgroup(pod.Namespace, pod.Name, containerName)
+			for _, pid := range pids {
+				MovePid(cgroup, pid.Pid)
+			}
+
 			//GAIN ALGO STUFF HERE
 			maddress := strings.Split(pod.Labels["MAddress"], "/")[0]
 			daddresses := strings.Split(pod.Labels["DAddresses"], ",")
@@ -325,6 +332,7 @@ func (dri *ContainerdRuntimeInterface) SetupPodIPs(pod *v1.Pod, task containerd.
 			}
 
 			ips := append(filtaddresses, maddress)
+
 			BindNetNamespace(pod.ObjectMeta.Namespace, pod.ObjectMeta.Name, int(pids[0].Pid), bandwidth, latency, ips)
 		}
 	}

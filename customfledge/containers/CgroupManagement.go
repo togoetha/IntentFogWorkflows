@@ -78,3 +78,8 @@ func SetCpuLimit(cgName string, cpus float64) {
 	cmd = fmt.Sprintf("cgset -r cpu.cfs_quota_us=%d vkubelet/%s", int64(100000*cpus), cgName)
 	utils.ExecCmdBash(cmd)
 }
+
+func MovePid(cgName string, pid uint32) {
+	cmd := fmt.Sprintf("cgclassify -g memory,cpu:vkubelet/%s %d", cgName, pid)
+	utils.ExecCmdBash(cmd)
+}
