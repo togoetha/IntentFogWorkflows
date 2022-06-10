@@ -10,7 +10,7 @@ import (
 var MainGroup cgroups.Cgroup
 var Cgroups map[string]*cgroups.Cgroup
 
-func Init() {
+func InitCgroups() {
 	MainGroup, _ = cgroups.New(cgroups.V1, cgroups.StaticPath("/vkubelet"), &specs.LinuxResources{})
 	Cgroups = make(map[string]*cgroups.Cgroup)
 }

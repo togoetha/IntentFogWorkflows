@@ -21,6 +21,7 @@ func main() {
 
 	cri := (&containers.ContainerdRuntimeInterface{}).Init()
 
+	containers.InitCgroups()
 	containers.InitContainerNetworking()
 
 	for i := 0; i < config.Cfg.NumServices; i++ {
