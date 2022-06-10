@@ -46,6 +46,9 @@ func BindNetNamespace(namespace string, pod string, pid int, bandwidth int64, la
 			subnetMask := strings.Split(subnet, "/")[1]
 			cniif := fmt.Sprintf("eth%d", counter)
 			cmd := fmt.Sprintf("sh -x ./setupcontainercni.sh %s %d %s %s %s %d %dms", netNs, pid, cniif, gwip, subnetMask, bandwidth, latency)
+			if latency == 0 {
+				cmd = fmt.Sprintf("sh -x ./setupcontainercni.sh %s %d %s %s %s %d", netNs, pid, cniif, gwip, subnetMask, bandwidth)
+			}
 			utils.ExecCmdBash(cmd)
 
 			for _, ip := range ips {
