@@ -109,7 +109,7 @@ func sendRESTMessage(message Message) string {
 		}(targetIP)
 	}
 
-	log(fmt.Sprintf("Message id %d sent\n", message.MessageId))
+	log(fmt.Sprintf("Message id %s sent\n", message.MessageId))
 
 	return "" //logline
 }
@@ -124,6 +124,8 @@ func sendTestMessage(message Message) error {
 			bytes.NewBuffer(jsonData))
 
 		if err != nil {
+			log(fmt.Sprintf("Failed to write to service %s\n", serviceUrl))
+			log(err.Error())
 			return err
 		}
 	}
