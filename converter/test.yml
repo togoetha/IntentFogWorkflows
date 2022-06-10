@@ -12,22 +12,38 @@ nodes:
   - name: node0
     publicip: "10.2.0.93"
     services:
-      - name: "n0_wf1_ms1"
+      - name: "user1request"
         image: togoetha/dummygenerator
         bandwidth: "100M"
         memory: "200M"
         cpu: "1000m"
-        latency: 1
+        latency: 0
         mipaddr: "192.168.99.10/24"
         dipaddr: ["192.168.199.1/24"]
-      - name: "n0_wf1_ms2"
+      - name: "user1response"
         image: togoetha/dummysink
         bandwidth: "100M"
         memory: "300M"
         cpu: "1000m"
-        latency: 1
+        latency: 0
         mipaddr: "192.168.99.20/24"
         dipaddr: ["192.168.199.4/24"]
+      - name: "user2request"
+        image: togoetha/dummygenerator
+        bandwidth: "100M"
+        memory: "200M"
+        cpu: "1000m"
+        latency: 0
+        mipaddr: "192.168.99.30/24"
+        dipaddr: ["192.168.199.5/24"]
+      - name: "user2response"
+        image: togoetha/dummysink
+        bandwidth: "100M"
+        memory: "300M"
+        cpu: "1000m"
+        latency: 0
+        mipaddr: "192.168.99.40/24"
+        dipaddr: ["192.168.199.6/24"]
   - name: node1
     publicip: "10.2.0.94"
     services:
@@ -36,7 +52,7 @@ nodes:
         bandwidth: "15M"
         memory: "200M"
         cpu: "100m"
-        latency: 1
+        latency: 0
         mipaddr: "192.168.99.1/24"
         dipaddr: ["192.168.199.2/24", "192.168.0.1/30", "192.168.0.5/30", "192.168.0.9/30"]
       - name: "n1_wf1_ms2"
@@ -44,7 +60,7 @@ nodes:
         bandwidth: "30M"
         memory: "300M"
         cpu: "200m"
-        latency: 1
+        latency: 0
         mipaddr: "192.168.99.2/24"
         dipaddr: ["192.168.0.2/30", "192.168.0.13/30"]
   - name: node2
@@ -75,8 +91,11 @@ nodes:
         mipaddr: "192.168.99.5/24"
         dipaddr: ["192.168.0.14/30", "192.168.0.18/30", "192.168.0.22/30", "192.168.199.3/24"]
 links:
-  - name: "user-->wf1_ms1"
+  - name: "user1-->wf1_ms1"
     in: ["192.168.199.1/24"]
+    out: ["192.168.199.2/24"]
+  - name: "user2-->wf1_ms1"
+    in: ["192.168.199.5/24"]
     out: ["192.168.199.2/24"]
   - name: "wf1_ms1-->wf1_ms2"
     in: ["192.168.0.1/30"]
@@ -96,9 +115,12 @@ links:
   - name: "wf1_ms4-->wf1_ms5"
     in: ["192.168.0.21/30"]
     out: ["192.168.0.22/30"]
-  - name: "wf1_ms5-->user"
+  - name: "wf1_ms5-->user1"
     in: ["192.168.199.3/24"]
-    out: ["192.168.199.4/24"] #notice this is a subnet not IP, likely this need to change to an ip that represent group of users and there is an access gw behind it that handle individual relationships
+    out: ["192.168.199.4/24"] 
+  - name: "wf1_ms5-->user2"
+    in: ["192.168.199.3/24"]
+    out: ["192.168.199.6/24"]
 delays:
   - from: "10.2.0.94"
     to: "10.2.0.96"

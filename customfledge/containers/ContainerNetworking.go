@@ -42,6 +42,7 @@ func InitContainerNetworking() {
 			_, contains := configDone[publicIf]
 			if !contains {
 				cmd = fmt.Sprintf("sh -x ./setupdelay.sh %s", publicIf)
+				configDone[publicIf] = true
 			}
 			class := 5 + counter
 			classId := fmt.Sprintf("1:%d", class)
