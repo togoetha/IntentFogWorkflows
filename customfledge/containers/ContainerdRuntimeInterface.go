@@ -315,7 +315,7 @@ func (dri *ContainerdRuntimeInterface) SetupPodIPs(pod *v1.Pod, task containerd.
 			//MAKE SURE THE DAMN ASS CGROUPS ARE SET
 			cgroup := GetCgroup(pod.Namespace, pod.Name, containerName)
 			for _, pid := range pids {
-				MovePid(cgroup, pid.Pid)
+				MovePid(cgroup, uint64(pid.Pid))
 			}
 
 			//GAIN ALGO STUFF HERE
