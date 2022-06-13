@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"processor/config"
+	"time"
 )
 
 var InstanceName string
@@ -23,6 +24,14 @@ func main() {
 		InstanceName = argsWithoutProg[1]
 		TargetIPs = argsWithoutProg[2:]
 	}
+
+	start := time.Now()
+	bubbles := 100000
+	for i := 0; i < bubbles; i++ {
+		bubbleSort(1000)
+	}
+
+	fmt.Printf("%d bubbles took %f s\n", bubbles, float32(time.Since(start).Milliseconds())/1000.0)
 
 	config.LoadConfig(cfgFile)
 
