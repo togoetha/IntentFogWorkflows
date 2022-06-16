@@ -46,7 +46,7 @@ nodes:
         image: togoetha/dummyprocessor
         bandwidth: "100M"
         memory: "200M"
-        cpu: "1500m"
+        cpu: "900m"
         workload: 1000
         latency: 0
         mipaddr: "192.168.99.1/24"
@@ -55,7 +55,7 @@ nodes:
         image: togoetha/dummyprocessor
         bandwidth: "100M"
         memory: "300M"
-        cpu: "1500m"
+        cpu: "900m"
         workload: 1000
         latency: 0
         mipaddr: "192.168.99.2/24"
@@ -64,7 +64,7 @@ nodes:
         image: togoetha/dummyprocessor
         bandwidth: "100M"
         memory: "250M"
-        cpu: "1500m"
+        cpu: "900m"
         workload: 1000
         latency: 0
         mipaddr: "192.168.99.3/24"
@@ -73,7 +73,7 @@ nodes:
         image: togoetha/dummyprocessor
         bandwidth: "100M"
         memory: "250M"
-        cpu: "1500m"
+        cpu: "900m"
         workload: 1000
         latency: 0
         mipaddr: "192.168.99.4/24"
