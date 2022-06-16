@@ -1,5 +1,5 @@
 {
-	"messages": 1000,
+	"messages": 500,
 	"messageFrequency": 20,
 	"defaultWorkloadSize": 2000,
 	"payloadSize": 200,
