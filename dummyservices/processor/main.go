@@ -8,10 +8,12 @@ import (
 	"os"
 	"os/exec"
 	"processor/config"
+	"strconv"
 	"time"
 )
 
 var InstanceName string
+var WorkloadSize int
 var TargetIPs []string
 
 func main() {
@@ -22,7 +24,8 @@ func main() {
 	if len(argsWithoutProg) > 0 {
 		cfgFile = argsWithoutProg[0]
 		InstanceName = argsWithoutProg[1]
-		TargetIPs = argsWithoutProg[2:]
+		WorkloadSize, _ = strconv.Atoi(argsWithoutProg[2])
+		TargetIPs = argsWithoutProg[3:]
 	}
 
 	start := time.Now()

@@ -9,12 +9,14 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"strconv"
 	"time"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 )
 
 var InstanceName string
+var MessageFrequency int
 var TargetIPs []string
 
 func main() {
@@ -25,7 +27,8 @@ func main() {
 	if len(argsWithoutProg) > 0 {
 		cfgFile = argsWithoutProg[0]
 		InstanceName = argsWithoutProg[1]
-		TargetIPs = argsWithoutProg[2:]
+		MessageFrequency, _ = strconv.Atoi(argsWithoutProg[2])
+		TargetIPs = argsWithoutProg[3:]
 	}
 
 	config.LoadConfig(cfgFile)
@@ -36,7 +39,7 @@ func main() {
 var running bool
 
 func generate() {
-	frequency := 1000 / config.Cfg.MessageFrequency
+	frequency := 1000.0 / float32(MessageFrequency)
 	id := 1
 	//running = true
 	message := generateMessage(config.Cfg.PayloadSize)

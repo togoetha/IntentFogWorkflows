@@ -26,7 +26,7 @@ func main() {
 	//fmt.Printf("Loading config file %s\n", cfgFile)
 	config.LoadConfig(cfgFile)
 
-	inputYamlFile := "test.yml"
+	inputYamlFile := "baselinelb.yml"
 	if len(argsWithoutProg) > 0 {
 		inputYamlFile = argsWithoutProg[0]
 	}
@@ -79,7 +79,7 @@ func convertToDeployments(inputYamlFile string) {
 
 		nodesvcs := []corev1.Pod{}
 		for _, podInfo := range nodeInfo.Services {
-			args := []string{"defaultconfig.json", podInfo.Name}
+			args := []string{"defaultconfig.json", podInfo.Name, strconv.Itoa(podInfo.Workload)}
 			addresses := getNextAddresses(podInfo, exp.Links)
 			for _, address := range addresses {
 				args = append(args, strings.Split(address, "/")[0])
@@ -246,6 +246,7 @@ type ServiceInfo struct {
 	Latency   int
 	Mipaddr   string
 	Dipaddr   []string
+	Workload  int
 }
 
 type LinkInfo struct {
