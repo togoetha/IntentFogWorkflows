@@ -29,7 +29,7 @@ func main() {
 	}
 
 	start := time.Now()
-	bubbles := 1000
+	bubbles := 10000
 	for i := 0; i < bubbles; i++ {
 		bubbleSort(1000)
 	}
