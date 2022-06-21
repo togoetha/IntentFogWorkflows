@@ -17,18 +17,27 @@ import (
 
 var InstanceName string
 var MessageFrequency int
-var TargetIPs []string
+var TargetIPs []Target
+
+type Target struct {
+	ip    string
+	quota float64
+}
 
 func main() {
 	argsWithoutProg := os.Args[1:]
 	cfgFile := "defaultconfig.json"
 	InstanceName = "generator"
-	TargetIPs = []string{"127.0.0.1"}
+	TargetIPs = []Target{{ip: "127.0.0.1"}}
 	if len(argsWithoutProg) > 0 {
 		cfgFile = argsWithoutProg[0]
 		InstanceName = argsWithoutProg[1]
 		MessageFrequency, _ = strconv.Atoi(argsWithoutProg[2])
-		TargetIPs = argsWithoutProg[3:]
+		targets := argsWithoutProg[3:]
+		TargetIPs = []Target{}
+		for idx := 0; idx < len(targets); idx += 2 {
+			TargetIPs = append(TargetIPs, Target{ip: targets[idx]})
+		}
 	}
 
 	config.LoadConfig(cfgFile)
@@ -109,7 +118,7 @@ func sendRESTMessage(message Message) string {
 			if err != nil {
 				log(fmt.Sprintf("Failed to write to service %s\n", serviceUrl))
 			}
-		}(targetIP)
+		}(targetIP.ip)
 	}
 
 	log(fmt.Sprintf("Message id %s sent\n", message.MessageId))

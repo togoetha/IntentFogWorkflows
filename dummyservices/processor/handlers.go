@@ -50,9 +50,20 @@ func sendNextRESTMessage(orig Message) {
 	data.Workload = orig.Workload
 	data.Hops = orig.Hops
 
-	for _, targetIP := range TargetIPs {
-		go func(targetIP string) {
-			serviceUrl := fmt.Sprintf(config.Cfg.PushServiceURL, targetIP)
+	if LoadBalanceMode {
+		//fmt.Println("Load balance mode")
+		targetIP := TargetIPs[0]
+		for _, target := range TargetIPs {
+			current := float64(MessageCounts[target.ip]) / float64(TotalMessages)
+			logger(fmt.Sprintf("Messages processed %d, target %s current %f quota %f\n", TotalMessages, target.ip, current, target.quota))
+			if current < target.quota {
+				logger(fmt.Sprintf("Sending to %s\n", target.ip))
+				targetIP = target
+				break
+			}
+		}
+		go func(target Target) {
+			serviceUrl := fmt.Sprintf(config.Cfg.PushServiceURL, target.ip)
 			data.Hops[len(data.Hops)-1].ExitTime = time.Now().UnixMicro()
 			jsonData, err := json.Marshal(data)
 			_, err = http.Post(serviceUrl, "application/json",
@@ -62,5 +73,21 @@ func sendNextRESTMessage(orig Message) {
 				logger(fmt.Sprintf("Failed to write to service %s\n", serviceUrl))
 			}
 		}(targetIP)
+		MessageCounts[targetIP.ip] += 1
+		TotalMessages++
+	} else {
+		for _, targetIP := range TargetIPs {
+			go func(target Target) {
+				serviceUrl := fmt.Sprintf(config.Cfg.PushServiceURL, target.ip)
+				data.Hops[len(data.Hops)-1].ExitTime = time.Now().UnixMicro()
+				jsonData, err := json.Marshal(data)
+				_, err = http.Post(serviceUrl, "application/json",
+					bytes.NewBuffer(jsonData))
+
+				if err != nil {
+					logger(fmt.Sprintf("Failed to write to service %s\n", serviceUrl))
+				}
+			}(targetIP)
+		}
 	}
 }

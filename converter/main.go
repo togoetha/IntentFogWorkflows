@@ -26,7 +26,7 @@ func main() {
 	//fmt.Printf("Loading config file %s\n", cfgFile)
 	config.LoadConfig(cfgFile)
 
-	inputYamlFile := "baselinechain.yml"
+	inputYamlFile := "optimizedlb.yml"
 	if len(argsWithoutProg) > 0 {
 		inputYamlFile = argsWithoutProg[0]
 	}
@@ -80,9 +80,10 @@ func convertToDeployments(inputYamlFile string) {
 		nodesvcs := []corev1.Pod{}
 		for _, podInfo := range nodeInfo.Services {
 			args := []string{"defaultconfig.json", podInfo.Name, strconv.Itoa(podInfo.Workload)}
-			addresses := getNextAddresses(podInfo, exp.Links)
-			for _, address := range addresses {
+			addresses, messagequota := getNextAddresses(podInfo, exp.Links)
+			for idx, address := range addresses {
 				args = append(args, strings.Split(address, "/")[0])
+				args = append(args, fmt.Sprintf("%f", messagequota[idx]))
 			}
 			pod := corev1.Pod{
 				ObjectMeta: v1.ObjectMeta{
@@ -167,19 +168,21 @@ func routeMap(local NodeInfo, nodes []NodeInfo) map[string]string {
 	return routes
 }
 
-func getNextAddresses(svcInfo ServiceInfo, links []LinkInfo) []string {
+func getNextAddresses(svcInfo ServiceInfo, links []LinkInfo) ([]string, []float32) {
 	addresses := []string{}
+	quota := []float32{}
 
 	for _, link := range links {
 		for _, dAddr := range svcInfo.Dipaddr {
 			for _, inAddr := range link.In {
 				if dAddr == inAddr {
 					addresses = append(addresses, link.Out...)
+					quota = append(quota, link.Quota)
 				}
 			}
 		}
 	}
-	return addresses
+	return addresses, quota
 }
 
 func IPIntToString(ip int) (string, error) {
@@ -250,9 +253,10 @@ type ServiceInfo struct {
 }
 
 type LinkInfo struct {
-	Name string
-	In   []string
-	Out  []string
+	Name  string
+	In    []string
+	Out   []string
+	Quota float32
 }
 
 type DelayInfo struct {

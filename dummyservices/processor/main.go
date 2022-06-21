@@ -9,34 +9,57 @@ import (
 	"os/exec"
 	"processor/config"
 	"strconv"
-	"time"
 )
 
 var InstanceName string
 var WorkloadSize int
-var TargetIPs []string
+var TargetIPs []Target
+var LoadBalanceMode bool
+var TotalMessages int
+var MessageCounts map[string]int
+
+type Target struct {
+	ip    string
+	quota float64
+}
 
 func main() {
 	argsWithoutProg := os.Args[1:]
 	cfgFile := "defaultconfig.json"
 	InstanceName = "processor"
-	TargetIPs = []string{"127.0.0.1"}
+	TargetIPs = []Target{{ip: "127.0.0.1"}}
+	MessageCounts = make(map[string]int)
+	TotalMessages = 0
+	LoadBalanceMode = false
 	if len(argsWithoutProg) > 0 {
 		cfgFile = argsWithoutProg[0]
 		InstanceName = argsWithoutProg[1]
 		WorkloadSize, _ = strconv.Atoi(argsWithoutProg[2])
-		TargetIPs = argsWithoutProg[3:]
+		targets := argsWithoutProg[3:]
+		TargetIPs = []Target{}
+		for idx := 0; idx < len(targets); idx += 2 {
+			quota, _ := strconv.ParseFloat(targets[idx+1], 32)
+			if quota != 0 {
+				LoadBalanceMode = true
+			}
+			MessageCounts[targets[idx]] = 0
+			TargetIPs = append(TargetIPs, Target{ip: targets[idx], quota: quota})
+		}
 	}
 
-	start := time.Now()
-	bubbles := 10000
+	/*start := time.Now()
+	bubbles := 100
 	for i := 0; i < bubbles; i++ {
 		bubbleSort(1000)
-	}
+	}*/
 
-	fmt.Printf("%d bubbles took %f s\n", bubbles, float32(time.Since(start).Milliseconds())/1000.0)
+	//fmt.Printf("%d bubbles took %f s\n", bubbles, float32(time.Since(start).Milliseconds())/1000.0)
 
 	config.LoadConfig(cfgFile)
+
+	/*for i := 0; i < 1000; i++ {
+		sendNextRESTMessage(Message{Workload: 20, MessageId: "test", Hops: []NodeData{{NodeId: "test"}}})
+	}*/
 
 	//fmt.Println(time.Now().UnixNano())
 	if config.Cfg.ServiceMode {
