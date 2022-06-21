@@ -49,7 +49,7 @@ nodes:
         mipaddr: "192.168.99.20/24"
         dipaddr: ["192.168.199.20/24"]
   - name: node1 #4500
-    publicip: "10.2.0.79"
+    publicip: "10.2.0.94"
     services:
       - name: "n7.364"
         image: togoetha/dummyprocessor
@@ -70,7 +70,7 @@ nodes:
         mipaddr: "192.168.99.5/24"
         dipaddr: ["192.168.0.14/30", "192.168.0.18/30", "192.168.0.22/30", "192.168.199.3/24"]
   - name: node2 #4500
-    publicip: "10.2.0.96"
+    publicip: "10.2.0.79"
     services:
       - name: "n8.575"
         image: togoetha/dummyprocessor
@@ -91,7 +91,7 @@ nodes:
         mipaddr: "192.168.99.6/24"
         dipaddr: ["192.168.0.15/30", "192.168.0.19/30", "192.168.0.23/30", "192.168.199.4/24"]
   - name: node3 #7500
-    publicip: "10.2.0.94"
+    publicip: "10.2.0.96"
     services:
       - name: "n9.40"
         image: togoetha/dummyprocessor
