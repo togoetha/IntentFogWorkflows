@@ -24,7 +24,7 @@ nodes:
       - name: "userresponse"
         image: togoetha/dummysink
         bandwidth: "100M"
-        memory: "300M"
+        memory: "400M"
         cpu: "2000m"
         workload: 0
         latency: 0
@@ -36,7 +36,7 @@ nodes:
       - name: "user2request"
         image: togoetha/dummygenerator
         bandwidth: "100M"
-        memory: "200M"
+        memory: "400M"
         cpu: "2000m"
         workload: 20
         latency: 0
@@ -48,7 +48,7 @@ nodes:
       - name: "user3request"
         image: togoetha/dummygenerator
         bandwidth: "100M"
-        memory: "200M"
+        memory: "400M"
         cpu: "2000m"
         workload: 20
         latency: 0
@@ -60,7 +60,7 @@ nodes:
       - name: "n7.3"
         image: togoetha/dummyprocessor
         bandwidth: "100M"
-        memory: "250M"
+        memory: "400M"
         cpu: "1500m"
         workload: 1000
         latency: 0
@@ -69,7 +69,7 @@ nodes:
       - name: "n7.4"
         image: togoetha/dummyprocessor
         bandwidth: "100M"
-        memory: "250M"
+        memory: "400M"
         cpu: "1500m"
         workload: 1000
         latency: 0
@@ -81,7 +81,7 @@ nodes:
       - name: "n8.3"
         image: togoetha/dummyprocessor
         bandwidth: "100M"
-        memory: "250M"
+        memory: "600M"
         cpu: "1500m"
         workload: 1000
         latency: 0
@@ -90,7 +90,7 @@ nodes:
       - name: "n8.4"
         image: togoetha/dummyprocessor
         bandwidth: "100M"
-        memory: "250M"
+        memory: "600M"
         cpu: "1500m"
         workload: 1000
         latency: 0
@@ -99,7 +99,7 @@ nodes:
       - name: "n8.5"
         image: togoetha/dummyprocessor
         bandwidth: "100M"
-        memory: "250M"
+        memory: "800M"
         cpu: "4500m"
         workload: 1000
         latency: 0
@@ -111,7 +111,7 @@ nodes:
       - name: "n9.1"
         image: togoetha/dummyprocessor
         bandwidth: "100M"
-        memory: "200M"
+        memory: "400M"
         cpu: "2300m"
         workload: 1000
         latency: 0
@@ -120,13 +120,12 @@ nodes:
       - name: "n9.2"
         image: togoetha/dummyprocessor
         bandwidth: "100M"
-        memory: "300M"
+        memory: "400M"
         cpu: "2200m"
         workload: 1000
         latency: 0
         mipaddr: "192.168.99.2/24"
         dipaddr: ["192.168.0.2/30", "192.168.0.13/30"]
-
 links:
   - name: "user1-->wf1_ms1"
     in: "192.168.199.10/24"

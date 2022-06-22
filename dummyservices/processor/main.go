@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"processor/config"
+	"processor/message"
 	"strconv"
 	"strings"
 )
@@ -26,17 +27,12 @@ type Target struct {
 	MessageCounts map[string]int
 }
 
-var messageData []byte
+var messageData string
 
 func main() {
 	argsWithoutProg := os.Args[1:]
 	cfgFile := "defaultconfig.json"
 	InstanceName = "processor"
-
-	messageData = []byte{}
-	for i := 0; i < config.Cfg.PayloadSize; i++ {
-		messageData = append(messageData, byte(i%10))
-	}
 
 	Targets = []Target{}
 	TotalMessages = 0
@@ -67,6 +63,20 @@ func main() {
 	//fmt.Printf("%d bubbles took %f s\n", bubbles, float32(time.Since(start).Milliseconds())/1000.0)
 
 	config.LoadConfig(cfgFile)
+
+	data := []byte{}
+	for i := 0; i < config.Cfg.PayloadSize; i++ {
+		data = append(data, byte(i%10))
+	}
+	messageData = string(data)
+
+	/*testMsg := generateMessage()
+	testMsg.MessageId = "10"
+	testMsg.Workload = 200
+	testMsg.Hops = []message.NodeData{{NodeId: "test", EntryTime: time.Now().UnixMicro(), ExitTime: time.Now().UnixMicro()}}
+
+	json, _ := easyjson.Marshal(testMsg)
+	fmt.Println(string(json))*/
 
 	/*for i := 0; i < 1000; i++ {
 		sendNextRESTMessage(Message{Workload: 20, MessageId: "test", Hops: []NodeData{{NodeId: "test"}}})
@@ -110,4 +120,17 @@ func logger(line string) {
 	if _, err = f.WriteString(line); err != nil {
 		panic(err)
 	}
+}
+
+func generateMessage() message.Message {
+	/*data := ""
+	for i := 0; i < payloadSize; i++ {
+		data += strconv.Itoa(i % 10)
+	}*/
+
+	message := message.Message{
+		Payload: messageData,
+	}
+
+	return message
 }

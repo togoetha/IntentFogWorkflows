@@ -1,17 +1,8 @@
 package main
 
-import (
-	"encoding/json"
-	"fmt"
-	"sink/config"
-	"time"
-
-	mqtt "github.com/eclipse/paho.mqtt.golang"
-)
-
 var running bool
 
-func processMessages() {
+/*func processMessages() {
 	running = true
 
 	c := *getClient()
@@ -23,9 +14,9 @@ func processMessages() {
 	for running {
 		time.Sleep(50 * time.Millisecond)
 	}
-}
+}*/
 
-func getClient() *mqtt.Client {
+/*func getClient() *mqtt.Client {
 	opts := mqtt.NewClientOptions()
 	opts.AddBroker(config.Cfg.MqttBroker)
 	opts.SetClientID(config.Cfg.MqttClientId).SetTLSConfig(getTlsConfig())
@@ -36,9 +27,9 @@ func getClient() *mqtt.Client {
 
 	client := mqtt.NewClient(opts)
 	return &client
-}
+}*/
 
-func handleMessage(client mqtt.Client, message mqtt.Message) {
+/*func handleMessage(client mqtt.Client, message mqtt.Message) {
 	msg := Message{}
 	json.Unmarshal(message.Payload(), &msg)
 
@@ -47,4 +38,4 @@ func handleMessage(client mqtt.Client, message mqtt.Message) {
 		//sendNextMqttMessage(msg.MessageId)
 		finishMessage(msg)
 	}()
-}
+}*/

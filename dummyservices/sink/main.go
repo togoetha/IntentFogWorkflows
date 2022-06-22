@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"sink/config"
+	"sink/message"
 	"strings"
 	"time"
 )
@@ -28,12 +29,12 @@ func main() {
 	loglines = []string{}
 	config.LoadConfig(cfgFile)
 
-	if config.Cfg.ServiceMode {
-		router := NewRouter()
-		log.Fatal(http.ListenAndServe(":8080", router))
-	} else {
+	//if config.Cfg.ServiceMode {
+	router := NewRouter()
+	log.Fatal(http.ListenAndServe(":8080", router))
+	/*} else {
 		processMessages()
-	}
+	}*/
 }
 
 func getTlsConfig() *tls.Config {
@@ -55,7 +56,7 @@ func execCmdBash(dfCmd string) (string, error) {
 	return string(stdout), nil
 }
 
-func finishMessage(msg Message) {
+func finishMessage(msg message.Message) {
 	totalTime := time.Since(time.UnixMicro(msg.Hops[0].ExitTime))
 	//now := time.Now().UnixMicro()
 	strTimes := []string{}

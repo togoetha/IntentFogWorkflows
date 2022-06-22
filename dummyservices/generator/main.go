@@ -2,10 +2,10 @@ package main
 
 import (
 	"bytes"
-	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"generator/config"
+	"generator/message"
 	"net/http"
 	"os"
 	"os/exec"
@@ -13,7 +13,7 @@ import (
 	"strings"
 	"time"
 
-	mqtt "github.com/eclipse/paho.mqtt.golang"
+	easyjson "github.com/mailru/easyjson"
 )
 
 var InstanceName string
@@ -26,7 +26,7 @@ type Target struct {
 	MessageCounts map[string]int
 }
 
-var messageData []byte
+var messageData string
 
 func main() {
 	argsWithoutProg := os.Args[1:]
@@ -64,40 +64,54 @@ func main() {
 
 //var running bool
 
+func generateMessage() message.Message {
+	/*data := ""
+	for i := 0; i < payloadSize; i++ {
+		data += strconv.Itoa(i % 10)
+	}*/
+
+	message := message.Message{
+		Payload: messageData,
+	}
+
+	return message
+}
+
 func generate() {
 	frequency := 1000.0 / float32(MessageFrequency)
 	id := 1
 	//running = true
 
-	messageData = []byte{}
+	data := []byte{}
 	for i := 0; i < config.Cfg.PayloadSize; i++ {
-		messageData = append(messageData, byte(i%10))
+		data = append(data, byte(i%10))
 	}
+	messageData = string(data)
 
-	message := generateMessage()
-	message.MessageId = "Test1000000"
-	message.Workload = config.Cfg.DefaultWorkloadSize
-	message.Hops = []NodeData{{NodeId: InstanceName, ExitTime: time.Now().UnixMicro()}}
-	err := sendTestMessage(message)
+	msg := generateMessage()
+	msg.MessageId = "Test1000000"
+	msg.Workload = config.Cfg.DefaultWorkloadSize
+	msg.Hops = []message.NodeData{{NodeId: InstanceName, ExitTime: time.Now().UnixMicro()}}
+	err := sendTestMessage(msg)
 	for err != nil {
 		log(fmt.Sprintf("%d Can't reach clients yet, retrying\n", time.Now().UnixMilli()))
-		err = sendTestMessage(message)
+		err = sendTestMessage(msg)
 	}
 
 	//loglines := []string{}
 	for i := 0; i < config.Cfg.Messages; i++ {
 		go func(msgId int) {
-			message := generateMessage()
-			message.MessageId = fmt.Sprintf("%s%d", InstanceName, msgId)
-			message.Workload = config.Cfg.DefaultWorkloadSize
+			msg := generateMessage()
+			msg.MessageId = fmt.Sprintf("%s%d", InstanceName, msgId)
+			msg.Workload = config.Cfg.DefaultWorkloadSize
 
 			//message.SortSize = config.Cfg.DefaultWorkloadSize
 
-			if config.Cfg.ServiceMode {
-				sendRESTMessage(message)
-			} else {
-				sendMqttMessage(message)
-			}
+			//if config.Cfg.ServiceMode {
+			sendRESTMessage(msg)
+			/*} else {
+				sendMqttMessage(msg)
+			}*/
 		}(id)
 
 		id++
@@ -118,7 +132,7 @@ func execCmdBash(dfCmd string) (string, error) {
 	return string(stdout), nil
 }
 
-func sendRESTMessage(message Message) string {
+func sendRESTMessage(msg message.Message) string {
 	for _, target := range Targets {
 
 		tIP := ""
@@ -137,11 +151,11 @@ func sendRESTMessage(message Message) string {
 		}
 		go func(target string) {
 			serviceUrl := fmt.Sprintf(config.Cfg.PushServiceURL, tIP)
-			message.Hops = []NodeData{{NodeId: InstanceName, ExitTime: time.Now().UnixMicro()}}
-			jsonData, err := json.Marshal(message)
+			msg.Hops = []message.NodeData{{NodeId: InstanceName, ExitTime: time.Now().UnixMicro()}}
+			jsonData, err := json.Marshal(msg)
 			_, err = http.Post(serviceUrl, "application/json",
 				bytes.NewBuffer(jsonData))
-			log(fmt.Sprintf("%d Message id %s to service %s\n", time.Now().UnixMilli(), message.MessageId, serviceUrl))
+			log(fmt.Sprintf("%d Message id %s to service %s\n", time.Now().UnixMilli(), msg.MessageId, serviceUrl))
 			if err != nil {
 				log(fmt.Sprintf("%d Failed to write to service %s\n", time.Now().UnixMilli(), serviceUrl))
 			}
@@ -150,15 +164,15 @@ func sendRESTMessage(message Message) string {
 		target.MessageCounts[tIP] += 1
 	}
 	TotalMessages++
-	log(fmt.Sprintf("%d Message id %s sent\n", time.Now().UnixMilli(), message.MessageId))
+	log(fmt.Sprintf("%d Message id %s sent\n", time.Now().UnixMilli(), msg.MessageId))
 	//fmt.Printf("%d Message id %s sent\n", time.Now().UnixMilli(), message.MessageId)
 
 	return "" //logline
 }
 
-func sendTestMessage(message Message) error {
+func sendTestMessage(msg message.Message) error {
 	//message.History = []string{InstanceName}
-	jsonData, err := json.Marshal(message)
+	jsonData, err := easyjson.Marshal(msg)
 	//fmt.Println(string(jsonData))
 	for _, targetIP := range Targets {
 		for ip := range targetIP.IPQuota {
@@ -176,7 +190,7 @@ func sendTestMessage(message Message) error {
 	return nil
 }
 
-func sendMqttMessage(message Message) {
+/*func sendMqttMessage(msg message.Message) {
 	log("Sending content to MQTT")
 	client := *getClient()
 	if token := client.Connect(); token.Wait() && token.Error() != nil {
@@ -184,7 +198,7 @@ func sendMqttMessage(message Message) {
 		log(token.Error().Error())
 	}
 
-	payload, err := json.Marshal(message)
+	payload, err := easyjson.Marshal(msg)
 	if err != nil {
 		log(err.Error())
 	}
@@ -199,15 +213,15 @@ func sendMqttMessage(message Message) {
 
 	log("Published")
 	client.Disconnect(250)
-}
+}*/
 
-func getTlsConfig() *tls.Config {
+/*func getTlsConfig() *tls.Config {
 	return &tls.Config{
 		ClientAuth: tls.RequestClientCert,
 	}
-}
+}*/
 
-func getClient() *mqtt.Client {
+/*func getClient() *mqtt.Client {
 	opts := mqtt.NewClientOptions()
 	opts.AddBroker(config.Cfg.MqttBroker)
 	opts.SetClientID(config.Cfg.MqttClientId).SetTLSConfig(getTlsConfig())
@@ -218,7 +232,7 @@ func getClient() *mqtt.Client {
 
 	client := mqtt.NewClient(opts)
 	return &client
-}
+}*/
 
 func log(line string) {
 	f, err := os.OpenFile("/usr/bin/output.txt", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0666)

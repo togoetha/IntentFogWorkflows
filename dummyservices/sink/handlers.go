@@ -1,22 +1,24 @@
 package main
 
 import (
-	"encoding/json"
 	"net/http"
+	"sink/message"
 	"time"
+
+	easyjson "github.com/mailru/easyjson"
 )
 
 func ProcessMessage(w http.ResponseWriter, r *http.Request) {
-	decoder := json.NewDecoder(r.Body)
-	var message Message
-	if err := decoder.Decode(&message); err != nil {
+	//decoder := json.NewDecoder(r.Body)
+	var msg message.Message
+	if err := easyjson.UnmarshalFromReader(r.Body, &msg); err != nil {
 		panic(err)
 	}
 
 	go func() {
-		message.Hops = append(message.Hops, NodeData{NodeId: InstanceName, EntryTime: time.Now().UnixMicro()})
+		msg.Hops = append(msg.Hops, message.NodeData{NodeId: InstanceName, EntryTime: time.Now().UnixMicro()})
 		//bubbleSort(config.Cfg.DefaultWorkload)
-		finishMessage(message)
+		finishMessage(msg)
 	}()
 }
 

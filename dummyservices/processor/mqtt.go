@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"processor/config"
+	"processor/message"
 	"time"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
@@ -38,9 +39,9 @@ func getClient() *mqtt.Client {
 	return &client
 }
 
-func handleMessage(client mqtt.Client, message mqtt.Message) {
-	msg := Message{}
-	json.Unmarshal(message.Payload(), &msg)
+func handleMessage(client mqtt.Client, mess mqtt.Message) {
+	msg := message.Message{}
+	json.Unmarshal(mess.Payload(), &msg)
 
 	go func() {
 		//bubbleSort(config.Cfg.DefaultWorkloadSize)

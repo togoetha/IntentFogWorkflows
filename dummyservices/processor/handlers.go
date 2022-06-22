@@ -2,31 +2,42 @@ package main
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"processor/config"
+	"processor/message"
 	"time"
+
+	"github.com/mailru/easyjson"
 )
 
 func ProcessMessage(w http.ResponseWriter, r *http.Request) {
-	decoder := json.NewDecoder(r.Body)
-	var message Message
-	if err := decoder.Decode(&message); err != nil {
+	var msg message.Message
+
+	if err := easyjson.UnmarshalFromReader(r.Body, &msg); err != nil {
 		//panic(err)
 		logger(err.Error())
 		return
-	}
+	} /*else {
+		fmt.Printf("Message %s received payload %d", msg.MessageId, len(msg.Payload))
+	}*/
+	/*decoder := json.NewDecoder(r.Body)
 
-	logger(fmt.Sprintf("%d Message %s received\n", time.Now().UnixMilli(), message.MessageId))
-	message.Hops = append(message.Hops, NodeData{NodeId: InstanceName, EntryTime: time.Now().UnixMicro()})
+	if err := decoder.Decode(&msg); err != nil {
+		//panic(err)
+		logger(err.Error())
+		return
+	}*/
 
-	go func(message Message) {
+	logger(fmt.Sprintf("%d Message %s received\n", time.Now().UnixMilli(), msg.MessageId))
+	msg.Hops = append(msg.Hops, message.NodeData{NodeId: InstanceName, EntryTime: time.Now().UnixMicro()})
+
+	go func(msg message.Message) {
 		start := time.Now()
 		bubbleSort(WorkloadSize)
-		logger(fmt.Sprintf("%d Bubble sort for %s took %dms\n", time.Now().UnixMilli(), message.MessageId, time.Since(start).Milliseconds()))
-		sendNextRESTMessage(message)
-	}(message)
+		logger(fmt.Sprintf("%d Bubble sort for %s took %dms\n", time.Now().UnixMilli(), msg.MessageId, time.Since(start).Milliseconds()))
+		sendNextRESTMessage(msg)
+	}(msg)
 }
 
 func bubbleSort(n int) []int {
@@ -45,7 +56,7 @@ func bubbleSort(n int) []int {
 	return numbers
 }
 
-func sendNextRESTMessage(orig Message) {
+func sendNextRESTMessage(orig message.Message) {
 	data := generateMessage()
 	data.MessageId = orig.MessageId
 	data.Payload = orig.Payload
@@ -76,7 +87,7 @@ func sendNextRESTMessage(orig Message) {
 		go func(target string) {
 			serviceUrl := fmt.Sprintf(config.Cfg.PushServiceURL, target)
 			data.Hops[len(data.Hops)-1].ExitTime = time.Now().UnixMicro()
-			jsonData, err := json.Marshal(data)
+			jsonData, err := easyjson.Marshal(data)
 			_, err = http.Post(serviceUrl, "application/json",
 				bytes.NewBuffer(jsonData))
 
