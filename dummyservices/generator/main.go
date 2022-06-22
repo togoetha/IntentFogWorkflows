@@ -26,6 +26,8 @@ type Target struct {
 	MessageCounts map[string]int
 }
 
+var messageData []byte
+
 func main() {
 	argsWithoutProg := os.Args[1:]
 	cfgFile := "defaultconfig.json"
@@ -52,29 +54,41 @@ func main() {
 	config.LoadConfig(cfgFile)
 
 	generate()
+
+	i := 0
+	for true {
+		i++
+		time.Sleep(time.Second)
+	}
 }
 
-var running bool
+//var running bool
 
 func generate() {
 	frequency := 1000.0 / float32(MessageFrequency)
 	id := 1
 	//running = true
-	message := generateMessage(config.Cfg.PayloadSize)
+
+	messageData = []byte{}
+	for i := 0; i < config.Cfg.PayloadSize; i++ {
+		messageData = append(messageData, byte(i%10))
+	}
+
+	message := generateMessage()
 	message.MessageId = "Test1000000"
 	message.Workload = config.Cfg.DefaultWorkloadSize
 	message.Hops = []NodeData{{NodeId: InstanceName, ExitTime: time.Now().UnixMicro()}}
 	err := sendTestMessage(message)
 	for err != nil {
-		log("Can't reach clients yet, retrying\n")
+		log(fmt.Sprintf("%d Can't reach clients yet, retrying\n", time.Now().UnixMilli()))
 		err = sendTestMessage(message)
 	}
 
 	//loglines := []string{}
 	for i := 0; i < config.Cfg.Messages; i++ {
-		go func() {
-			message := generateMessage(config.Cfg.PayloadSize)
-			message.MessageId = fmt.Sprintf("%s%d", InstanceName, id)
+		go func(msgId int) {
+			message := generateMessage()
+			message.MessageId = fmt.Sprintf("%s%d", InstanceName, msgId)
 			message.Workload = config.Cfg.DefaultWorkloadSize
 
 			//message.SortSize = config.Cfg.DefaultWorkloadSize
@@ -84,7 +98,7 @@ func generate() {
 			} else {
 				sendMqttMessage(message)
 			}
-		}()
+		}(id)
 
 		id++
 		time.Sleep(time.Duration(frequency) * time.Millisecond)
@@ -109,13 +123,13 @@ func sendRESTMessage(message Message) string {
 
 		tIP := ""
 		for ip, quota := range target.IPQuota {
-			if quota == 0 {
+			if quota == 0 || TotalMessages == 0 {
 				tIP = ip
 			} else {
 				current := float64(target.MessageCounts[ip]) / float64(TotalMessages)
-				log(fmt.Sprintf("Messages processed %d, target %s current %f quota %f\n", TotalMessages, ip, current, quota))
+				log(fmt.Sprintf("%d Messages processed %d, target %s current %f quota %f\n", time.Now().UnixMilli(), TotalMessages, ip, current, quota))
 				if current < quota {
-					log(fmt.Sprintf("Sending to %s\n", ip))
+					log(fmt.Sprintf("%d Sending to %s\n", time.Now().UnixMilli(), ip))
 					tIP = ip
 					break
 				}
@@ -127,16 +141,17 @@ func sendRESTMessage(message Message) string {
 			jsonData, err := json.Marshal(message)
 			_, err = http.Post(serviceUrl, "application/json",
 				bytes.NewBuffer(jsonData))
-
+			log(fmt.Sprintf("%d Message id %s to service %s\n", time.Now().UnixMilli(), message.MessageId, serviceUrl))
 			if err != nil {
-				log(fmt.Sprintf("Failed to write to service %s\n", serviceUrl))
+				log(fmt.Sprintf("%d Failed to write to service %s\n", time.Now().UnixMilli(), serviceUrl))
 			}
 
 		}(tIP)
 		target.MessageCounts[tIP] += 1
 	}
 	TotalMessages++
-	log(fmt.Sprintf("Message id %s sent\n", message.MessageId))
+	log(fmt.Sprintf("%d Message id %s sent\n", time.Now().UnixMilli(), message.MessageId))
+	//fmt.Printf("%d Message id %s sent\n", time.Now().UnixMilli(), message.MessageId)
 
 	return "" //logline
 }

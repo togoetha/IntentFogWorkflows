@@ -26,14 +26,20 @@ type Target struct {
 	MessageCounts map[string]int
 }
 
+var messageData []byte
+
 func main() {
 	argsWithoutProg := os.Args[1:]
 	cfgFile := "defaultconfig.json"
 	InstanceName = "processor"
+
+	messageData = []byte{}
+	for i := 0; i < config.Cfg.PayloadSize; i++ {
+		messageData = append(messageData, byte(i%10))
+	}
+
 	Targets = []Target{}
-	//MessageCounts = make(map[string]int)
 	TotalMessages = 0
-	//LoadBalanceMode = false
 	if len(argsWithoutProg) > 0 {
 		cfgFile = argsWithoutProg[0]
 		InstanceName = argsWithoutProg[1]

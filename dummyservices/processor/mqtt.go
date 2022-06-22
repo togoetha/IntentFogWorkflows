@@ -56,7 +56,7 @@ func sendNextMqttMessage(id int, time int64) {
 		fmt.Println(token.Error())
 	}
 
-	data := generateMessage(config.Cfg.PayloadSize)
+	data := generateMessage()
 	//data.StartTime = []int64{time}
 	//data.MessageId = id
 
