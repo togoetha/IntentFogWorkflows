@@ -9,41 +9,46 @@ import (
 	"os/exec"
 	"processor/config"
 	"strconv"
+	"strings"
 )
 
 var InstanceName string
 var WorkloadSize int
-var TargetIPs []Target
-var LoadBalanceMode bool
+var Targets []Target
+
+//var LoadBalanceMode bool
 var TotalMessages int
-var MessageCounts map[string]int
+
+//var MessageCounts map[string]int
 
 type Target struct {
-	ip    string
-	quota float64
+	IPQuota       map[string]float64
+	MessageCounts map[string]int
 }
 
 func main() {
 	argsWithoutProg := os.Args[1:]
 	cfgFile := "defaultconfig.json"
 	InstanceName = "processor"
-	TargetIPs = []Target{{ip: "127.0.0.1"}}
-	MessageCounts = make(map[string]int)
+	Targets = []Target{}
+	//MessageCounts = make(map[string]int)
 	TotalMessages = 0
-	LoadBalanceMode = false
+	//LoadBalanceMode = false
 	if len(argsWithoutProg) > 0 {
 		cfgFile = argsWithoutProg[0]
 		InstanceName = argsWithoutProg[1]
 		WorkloadSize, _ = strconv.Atoi(argsWithoutProg[2])
 		targets := argsWithoutProg[3:]
-		TargetIPs = []Target{}
-		for idx := 0; idx < len(targets); idx += 2 {
-			quota, _ := strconv.ParseFloat(targets[idx+1], 32)
-			if quota != 0 {
-				LoadBalanceMode = true
+		//TargetIPs = []Target{}
+		for _, target := range targets {
+			ipquotas := make(map[string]float64)
+			ips := strings.Split(target, ",")
+			for _, ip := range ips {
+				parts := strings.Split(ip, ":")
+				num, _ := strconv.ParseFloat(parts[1], 64)
+				ipquotas[parts[0]] = num
 			}
-			MessageCounts[targets[idx]] = 0
-			TargetIPs = append(TargetIPs, Target{ip: targets[idx], quota: quota})
+			Targets = append(Targets, Target{IPQuota: ipquotas, MessageCounts: make(map[string]int)})
 		}
 	}
 

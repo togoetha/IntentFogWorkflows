@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/exec"
 	"strconv"
+	"strings"
 	"time"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
@@ -17,26 +18,34 @@ import (
 
 var InstanceName string
 var MessageFrequency int
-var TargetIPs []Target
+var Targets []Target
+var TotalMessages int
 
 type Target struct {
-	ip    string
-	quota float64
+	IPQuota       map[string]float64
+	MessageCounts map[string]int
 }
 
 func main() {
 	argsWithoutProg := os.Args[1:]
 	cfgFile := "defaultconfig.json"
 	InstanceName = "generator"
-	TargetIPs = []Target{{ip: "127.0.0.1"}}
+	Targets = []Target{}
 	if len(argsWithoutProg) > 0 {
 		cfgFile = argsWithoutProg[0]
 		InstanceName = argsWithoutProg[1]
 		MessageFrequency, _ = strconv.Atoi(argsWithoutProg[2])
 		targets := argsWithoutProg[3:]
-		TargetIPs = []Target{}
-		for idx := 0; idx < len(targets); idx += 2 {
-			TargetIPs = append(TargetIPs, Target{ip: targets[idx]})
+		//TargetIPs = []Target{}
+		for _, target := range targets {
+			ipquotas := make(map[string]float64)
+			ips := strings.Split(target, ",")
+			for _, ip := range ips {
+				parts := strings.Split(ip, ":")
+				num, _ := strconv.ParseFloat(parts[1], 64)
+				ipquotas[parts[0]] = num
+			}
+			Targets = append(Targets, Target{IPQuota: ipquotas, MessageCounts: make(map[string]int)})
 		}
 	}
 
@@ -80,17 +89,6 @@ func generate() {
 		id++
 		time.Sleep(time.Duration(frequency) * time.Millisecond)
 	}
-	/*f, err := os.OpenFile("/usr/bin/output.txt", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0666)
-	if err != nil {
-		panic(err)
-	}
-
-	defer f.Close()
-	for _, logline := range loglines {
-		if _, err = f.WriteString(logline); err != nil {
-			panic(err)
-		}
-	}*/
 }
 
 func execCmdBash(dfCmd string) (string, error) {
@@ -107,9 +105,24 @@ func execCmdBash(dfCmd string) (string, error) {
 }
 
 func sendRESTMessage(message Message) string {
-	for _, targetIP := range TargetIPs {
-		go func(target Target) {
-			serviceUrl := fmt.Sprintf(config.Cfg.PushServiceURL, target.ip)
+	for _, target := range Targets {
+
+		tIP := ""
+		for ip, quota := range target.IPQuota {
+			if quota == 0 {
+				tIP = ip
+			} else {
+				current := float64(target.MessageCounts[ip]) / float64(TotalMessages)
+				log(fmt.Sprintf("Messages processed %d, target %s current %f quota %f\n", TotalMessages, ip, current, quota))
+				if current < quota {
+					log(fmt.Sprintf("Sending to %s\n", ip))
+					tIP = ip
+					break
+				}
+			}
+		}
+		go func(target string) {
+			serviceUrl := fmt.Sprintf(config.Cfg.PushServiceURL, tIP)
 			message.Hops = []NodeData{{NodeId: InstanceName, ExitTime: time.Now().UnixMicro()}}
 			jsonData, err := json.Marshal(message)
 			_, err = http.Post(serviceUrl, "application/json",
@@ -118,9 +131,11 @@ func sendRESTMessage(message Message) string {
 			if err != nil {
 				log(fmt.Sprintf("Failed to write to service %s\n", serviceUrl))
 			}
-		}(targetIP)
-	}
 
+		}(tIP)
+		target.MessageCounts[tIP] += 1
+	}
+	TotalMessages++
 	log(fmt.Sprintf("Message id %s sent\n", message.MessageId))
 
 	return "" //logline
@@ -130,15 +145,17 @@ func sendTestMessage(message Message) error {
 	//message.History = []string{InstanceName}
 	jsonData, err := json.Marshal(message)
 	//fmt.Println(string(jsonData))
-	for _, targetIP := range TargetIPs {
-		serviceUrl := fmt.Sprintf(config.Cfg.PushServiceURL, targetIP.ip)
-		_, err = http.Post(serviceUrl, "application/json",
-			bytes.NewBuffer(jsonData))
+	for _, targetIP := range Targets {
+		for ip := range targetIP.IPQuota {
+			serviceUrl := fmt.Sprintf(config.Cfg.PushServiceURL, ip)
+			_, err = http.Post(serviceUrl, "application/json",
+				bytes.NewBuffer(jsonData))
 
-		if err != nil {
-			log(fmt.Sprintf("Failed to write to service %s\n", serviceUrl))
-			log(err.Error())
-			return err
+			if err != nil {
+				log(fmt.Sprintf("Failed to write to service %s\n", serviceUrl))
+				log(err.Error())
+				return err
+			}
 		}
 	}
 	return nil

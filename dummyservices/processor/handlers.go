@@ -50,20 +50,28 @@ func sendNextRESTMessage(orig Message) {
 	data.Workload = orig.Workload
 	data.Hops = orig.Hops
 
-	if LoadBalanceMode {
-		//fmt.Println("Load balance mode")
-		targetIP := TargetIPs[0]
-		for _, target := range TargetIPs {
-			current := float64(MessageCounts[target.ip]) / float64(TotalMessages)
-			logger(fmt.Sprintf("Messages processed %d, target %s current %f quota %f\n", TotalMessages, target.ip, current, target.quota))
-			if current < target.quota {
-				logger(fmt.Sprintf("Sending to %s\n", target.ip))
-				targetIP = target
+	//if LoadBalanceMode {
+	//fmt.Println("Load balance mode")
+	for _, target := range Targets {
+		tIP := ""
+		for ip, quota := range target.IPQuota {
+			if quota == 0 {
+				tIP = ip
 				break
+			} else {
+				current := float64(target.MessageCounts[ip]) / float64(TotalMessages)
+				logger(fmt.Sprintf("Messages processed %d, target %s current %f quota %f\n", TotalMessages, ip, current, quota))
+				//fmt.Printf("Messages processed %d, target %s current %f quota %f\n", TotalMessages, ip, current, quota)
+				if current < quota {
+					tIP = ip
+					break
+				}
 			}
 		}
-		go func(target Target) {
-			serviceUrl := fmt.Sprintf(config.Cfg.PushServiceURL, target.ip)
+		logger(fmt.Sprintf("Sending to %s\n", tIP))
+		//fmt.Printf("Sending to %s\n", tIP)
+		go func(target string) {
+			serviceUrl := fmt.Sprintf(config.Cfg.PushServiceURL, target)
 			data.Hops[len(data.Hops)-1].ExitTime = time.Now().UnixMicro()
 			jsonData, err := json.Marshal(data)
 			_, err = http.Post(serviceUrl, "application/json",
@@ -71,12 +79,15 @@ func sendNextRESTMessage(orig Message) {
 
 			if err != nil {
 				logger(fmt.Sprintf("Failed to write to service %s\n", serviceUrl))
+				//fmt.Printf("Failed to write to service %s\n", serviceUrl)
 			}
-		}(targetIP)
-		MessageCounts[targetIP.ip] += 1
-		TotalMessages++
-	} else {
-		for _, targetIP := range TargetIPs {
+
+		}(tIP)
+		target.MessageCounts[tIP] += 1
+	}
+	TotalMessages++
+	/*} else {
+		for _, targetIP := range Targets {
 			go func(target Target) {
 				serviceUrl := fmt.Sprintf(config.Cfg.PushServiceURL, target.ip)
 				data.Hops[len(data.Hops)-1].ExitTime = time.Now().UnixMicro()
@@ -89,5 +100,5 @@ func sendNextRESTMessage(orig Message) {
 				}
 			}(targetIP)
 		}
-	}
+	}*/
 }

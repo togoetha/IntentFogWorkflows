@@ -26,7 +26,7 @@ func main() {
 	//fmt.Printf("Loading config file %s\n", cfgFile)
 	config.LoadConfig(cfgFile)
 
-	inputYamlFile := "optimizedlb.yml"
+	inputYamlFile := "optimizedlb240.yml"
 	if len(argsWithoutProg) > 0 {
 		inputYamlFile = argsWithoutProg[0]
 	}
@@ -80,10 +80,10 @@ func convertToDeployments(inputYamlFile string) {
 		nodesvcs := []corev1.Pod{}
 		for _, podInfo := range nodeInfo.Services {
 			args := []string{"defaultconfig.json", podInfo.Name, strconv.Itoa(podInfo.Workload)}
-			addresses, messagequota := getNextAddresses(podInfo, exp.Links)
-			for idx, address := range addresses {
-				args = append(args, strings.Split(address, "/")[0])
-				args = append(args, fmt.Sprintf("%f", messagequota[idx]))
+			addresses := getNextAddresses(podInfo, exp.Links)
+			for _, address := range addresses {
+				args = append(args, address)
+				//args = append(args, fmt.Sprintf("%f", messagequota[idx]))
 			}
 			pod := corev1.Pod{
 				ObjectMeta: v1.ObjectMeta{
@@ -168,21 +168,23 @@ func routeMap(local NodeInfo, nodes []NodeInfo) map[string]string {
 	return routes
 }
 
-func getNextAddresses(svcInfo ServiceInfo, links []LinkInfo) ([]string, []float32) {
+func getNextAddresses(svcInfo ServiceInfo, links []LinkInfo) []string {
 	addresses := []string{}
-	quota := []float32{}
 
 	for _, link := range links {
 		for _, dAddr := range svcInfo.Dipaddr {
-			for _, inAddr := range link.In {
-				if dAddr == inAddr {
-					addresses = append(addresses, link.Out...)
-					quota = append(quota, link.Quota)
+			//for _, inAddr := range link.In {
+			if dAddr == link.In {
+				lbaddresses := []string{}
+				for _, output := range link.Lblinks {
+					lbaddresses = append(lbaddresses, fmt.Sprintf("%s:%f", strings.Split(output.Out, "/")[0], output.Quota))
 				}
+				addresses = append(addresses, strings.Join(lbaddresses, ","))
 			}
+			//}
 		}
 	}
-	return addresses, quota
+	return addresses
 }
 
 func IPIntToString(ip int) (string, error) {
@@ -253,10 +255,14 @@ type ServiceInfo struct {
 }
 
 type LinkInfo struct {
-	Name  string
-	In    []string
-	Out   []string
-	Quota float32
+	Name    string
+	In      string
+	Lblinks []LbLinkInfo
+}
+
+type LbLinkInfo struct {
+	Out   string
+	Quota float64
 }
 
 type DelayInfo struct {

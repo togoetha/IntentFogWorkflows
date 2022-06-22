@@ -2,7 +2,7 @@
 	"messages": 500,
 	"messageFrequency": 20,
 	"defaultWorkloadSize": 2000,
-	"payloadSize": 200,
+	"payloadSize": 30000,
 	"serviceMode": true,
 	"pushServiceURL": "http://%s:8080/process"
 }

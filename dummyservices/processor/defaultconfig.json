@@ -1,5 +1,5 @@
 {
-	"payloadSize": 200,
+	"payloadSize": 30000,
 	"serviceMode": true,
 	"pushServiceURL": "http://%s:8080/process"
 }
