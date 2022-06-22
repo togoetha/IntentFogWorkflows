@@ -21,24 +21,6 @@ nodes:
         latency: 0
         mipaddr: "192.168.99.10/24"
         dipaddr: ["192.168.199.10/24"]
-      - name: "user2request"
-        image: togoetha/dummygenerator
-        bandwidth: "100M"
-        memory: "200M"
-        cpu: "1000m"
-        workload: 20
-        latency: 0
-        mipaddr: "192.168.99.11/24"
-        dipaddr: ["192.168.199.11/24"]
-      - name: "user3request"
-        image: togoetha/dummygenerator
-        bandwidth: "100M"
-        memory: "200M"
-        cpu: "1000m"
-        workload: 20
-        latency: 0
-        mipaddr: "192.168.99.12/24"
-        dipaddr: ["192.168.199.12/24"]
       - name: "userresponse"
         image: togoetha/dummysink
         bandwidth: "100M"
@@ -48,8 +30,32 @@ nodes:
         latency: 0
         mipaddr: "192.168.99.20/24"
         dipaddr: ["192.168.199.20/24"]
-  - name: node1 #4500
+  - name: node1 
     publicip: "10.2.0.94"
+    services:
+      - name: "user2request"
+        image: togoetha/dummygenerator
+        bandwidth: "100M"
+        memory: "200M"
+        cpu: "1000m"
+        workload: 20
+        latency: 0
+        mipaddr: "192.168.99.11/24"
+        dipaddr: ["192.168.199.11/24"]
+  - name: node2 
+    publicip: "10.2.0.79"
+    services:
+      - name: "user3request"
+        image: togoetha/dummygenerator
+        bandwidth: "100M"
+        memory: "200M"
+        cpu: "1000m"
+        workload: 20
+        latency: 0
+        mipaddr: "192.168.99.12/24"
+        dipaddr: ["192.168.199.12/24"]
+  - name: node3 #4500
+    publicip: "10.2.0.96"
     services:
       - name: "n7.364"
         image: togoetha/dummyprocessor
@@ -69,8 +75,8 @@ nodes:
         latency: 0
         mipaddr: "192.168.99.5/24"
         dipaddr: ["192.168.0.14/30", "192.168.0.18/30", "192.168.0.22/30", "192.168.199.3/24"]
-  - name: node2 #4500
-    publicip: "10.2.0.79"
+  - name: node4 #4500
+    publicip: "10.2.0.93"
     services:
       - name: "n8.575"
         image: togoetha/dummyprocessor
@@ -90,8 +96,8 @@ nodes:
         latency: 0
         mipaddr: "192.168.99.6/24"
         dipaddr: ["192.168.0.15/30", "192.168.0.19/30", "192.168.0.23/30", "192.168.199.4/24"]
-  - name: node3 #7500
-    publicip: "10.2.0.96"
+  - name: node5 #7500
+    publicip: "10.2.0.75"
     services:
       - name: "n9.40"
         image: togoetha/dummyprocessor

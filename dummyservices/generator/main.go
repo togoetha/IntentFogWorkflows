@@ -108,8 +108,8 @@ func execCmdBash(dfCmd string) (string, error) {
 
 func sendRESTMessage(message Message) string {
 	for _, targetIP := range TargetIPs {
-		go func(targetIP string) {
-			serviceUrl := fmt.Sprintf(config.Cfg.PushServiceURL, targetIP)
+		go func(target Target) {
+			serviceUrl := fmt.Sprintf(config.Cfg.PushServiceURL, target.ip)
 			message.Hops = []NodeData{{NodeId: InstanceName, ExitTime: time.Now().UnixMicro()}}
 			jsonData, err := json.Marshal(message)
 			_, err = http.Post(serviceUrl, "application/json",
@@ -118,7 +118,7 @@ func sendRESTMessage(message Message) string {
 			if err != nil {
 				log(fmt.Sprintf("Failed to write to service %s\n", serviceUrl))
 			}
-		}(targetIP.ip)
+		}(targetIP)
 	}
 
 	log(fmt.Sprintf("Message id %s sent\n", message.MessageId))
@@ -131,7 +131,7 @@ func sendTestMessage(message Message) error {
 	jsonData, err := json.Marshal(message)
 	//fmt.Println(string(jsonData))
 	for _, targetIP := range TargetIPs {
-		serviceUrl := fmt.Sprintf(config.Cfg.PushServiceURL, targetIP)
+		serviceUrl := fmt.Sprintf(config.Cfg.PushServiceURL, targetIP.ip)
 		_, err = http.Post(serviceUrl, "application/json",
 			bytes.NewBuffer(jsonData))
 
