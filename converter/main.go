@@ -26,7 +26,7 @@ func main() {
 	//fmt.Printf("Loading config file %s\n", cfgFile)
 	config.LoadConfig(cfgFile)
 
-	inputYamlFile := "optimizedlb240.yml"
+	inputYamlFile := "baselinechain.yml"
 	if len(argsWithoutProg) > 0 {
 		inputYamlFile = argsWithoutProg[0]
 	}

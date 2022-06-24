@@ -66,7 +66,7 @@ func main() {
 
 	data := []byte{}
 	for i := 0; i < config.Cfg.PayloadSize; i++ {
-		data = append(data, byte(i%10))
+		data = append(data, byte(70+i%10))
 	}
 	messageData = string(data)
 
@@ -113,12 +113,12 @@ func execCmdBash(dfCmd string) (string, error) {
 func logger(line string) {
 	f, err := os.OpenFile("/usr/bin/output.txt", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
-		panic(err)
+		//panic(err)
 	}
 
 	defer f.Close()
 	if _, err = f.WriteString(line); err != nil {
-		panic(err)
+		//panic(err)
 	}
 }
 

@@ -1,0 +1,11 @@
+wget -O - -nv --ciphers DEFAULT@SECLEVEL=1 https://www.wall2.ilabt.iminds.be/enable-nat.sh | sudo bash
+git clone https://github.com/togoetha/dummyservices
+sudo dummyservices/customfledge/setup_worker.sh
+
+cd dummyservices/customfledge
+cp ../converter/configs/base240lb/node
+
+top -p `pgrep -d ',' service`
+
+sudo ctr tasks exec --exec-id 1 default_user1request_user1request /bin/sh
+sudo ctr tasks exec --exec-id 1 default_userresponse_userresponse /bin/sh

@@ -29,6 +29,65 @@ type Target struct {
 var messageData string
 
 func main() {
+	/*fmt.Println("JSON test")
+	data := []byte{}
+	for i := 0; i < 30000; i++ {
+		data = append(data, byte(70+i%10))
+	}
+
+	msg := message.Message{
+		Payload: string(data),
+	}
+	msg.MessageId = fmt.Sprintf("%s%d", "testinstance", 1000)
+	msg.Workload = 1000
+	msg.Hops = []message.NodeData{
+		{NodeId: InstanceName, ExitTime: time.Now().UnixMicro()},
+		{NodeId: InstanceName, ExitTime: time.Now().UnixMicro()},
+		{NodeId: InstanceName, ExitTime: time.Now().UnixMicro()},
+	}
+
+	jsonData, _ := json.Marshal(msg)
+	fmt.Println(string(jsonData))
+
+	start := time.Now()
+
+	for i := 0; i < 1000; i++ {
+		json.Marshal(msg)
+	}
+
+	fmt.Printf("100 marshals took %dms\n", time.Since(start).Milliseconds())
+	*/
+	//jsonStrData := []byte{}
+	/*start = time.Now()
+	for i := 0; i < 1000; i++ {
+		bytes := toFancyJson(msg)
+		if i == 0 {
+			//jsonStrData = bytes
+			fmt.Println(string(bytes))
+		}
+	}*/
+
+	//fmt.Printf("100 manual marshals took %dms\n", time.Since(start).Milliseconds())
+
+	/*start = time.Now()
+
+	for i := 0; i < 1000; i++ {
+		umsg := message.Message{}
+		json.Unmarshal(jsonData, &umsg)
+	}
+
+	fmt.Printf("100 unmarshals took %dms\n", time.Since(start).Milliseconds())
+
+	start = time.Now()
+
+	for i := 0; i < 1000; i++ {
+		jsonStr := ""
+		json.Unmarshal(jsonStrData, &jsonStr)
+		fromJson(jsonStr[0:300])
+	}
+
+	fmt.Printf("100 manual unmarshals took %dms\n", time.Since(start).Milliseconds())
+	*/
 	argsWithoutProg := os.Args[1:]
 	cfgFile := "defaultconfig.json"
 	InstanceName = "generator"
@@ -62,14 +121,21 @@ func main() {
 	}
 }
 
+/*func toFancyJson(msg message.Message) []byte {
+	//{"hops":[{"history":"","startTime":0,"endTime":1656010631547025},{"history":"","startTime":0,"endTime":1656010631547025},{"history":"","startTime":0,"endTime":1656010631547025}],"workload":1000,"payload":"","messageId":"testinstance1000"}
+	hops := []string{}
+	for _, data := range msg.Hops {
+		hops = append(hops, fmt.Sprintf("{\x22history\x22:\x22%s\x22,\x22startTime\x22:%d,\x22endTime\x22:%d}", data.NodeId, data.EntryTime, data.ExitTime))
+	}
+	str := fmt.Sprintf("{\x22hops\x22:[%s],\x22workload\x22:%d,\x22payload\x22:\x22%s\x22,\x22messageId\x22:\x22%s\x22}", strings.Join(hops, ","), msg.Workload, msg.Payload, msg.MessageId)
+	jsonData, _ := json.Marshal(str)
+
+	return jsonData
+}*/
+
 //var running bool
 
 func generateMessage() message.Message {
-	/*data := ""
-	for i := 0; i < payloadSize; i++ {
-		data += strconv.Itoa(i % 10)
-	}*/
-
 	message := message.Message{
 		Payload: messageData,
 	}
@@ -84,7 +150,7 @@ func generate() {
 
 	data := []byte{}
 	for i := 0; i < config.Cfg.PayloadSize; i++ {
-		data = append(data, byte(i%10))
+		data = append(data, byte(70+i%10))
 	}
 	messageData = string(data)
 

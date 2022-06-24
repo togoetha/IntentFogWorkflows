@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"processor/config"
@@ -14,20 +15,27 @@ import (
 func ProcessMessage(w http.ResponseWriter, r *http.Request) {
 	var msg message.Message
 
-	if err := easyjson.UnmarshalFromReader(r.Body, &msg); err != nil {
+	/*defer func() {
+		if r := recover(); r != nil {
+			logger(fmt.Sprintf("Recovered %i", r))
+		}
+	}()*/
+
+	/*if err := easyjson.UnmarshalFromReader(r.Body, &msg); err != nil {
 		//panic(err)
 		logger(err.Error())
 		return
-	} /*else {
+	} */ /*else {
 		fmt.Printf("Message %s received payload %d", msg.MessageId, len(msg.Payload))
 	}*/
-	/*decoder := json.NewDecoder(r.Body)
+
+	decoder := json.NewDecoder(r.Body)
 
 	if err := decoder.Decode(&msg); err != nil {
 		//panic(err)
 		logger(err.Error())
 		return
-	}*/
+	}
 
 	logger(fmt.Sprintf("%d Message %s received\n", time.Now().UnixMilli(), msg.MessageId))
 	msg.Hops = append(msg.Hops, message.NodeData{NodeId: InstanceName, EntryTime: time.Now().UnixMicro()})
