@@ -3,7 +3,6 @@ package main
 import (
 	"crypto/tls"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"os/exec"
@@ -28,6 +27,8 @@ type Target struct {
 }
 
 var messageData string
+
+var client *http.Client
 
 func main() {
 	argsWithoutProg := os.Args[1:]
@@ -54,12 +55,6 @@ func main() {
 		}
 	}
 
-	/*start := time.Now()
-	bubbles := 100
-	for i := 0; i < bubbles; i++ {
-		bubbleSort(1000)
-	}*/
-
 	//fmt.Printf("%d bubbles took %f s\n", bubbles, float32(time.Since(start).Milliseconds())/1000.0)
 
 	config.LoadConfig(cfgFile)
@@ -70,25 +65,29 @@ func main() {
 	}
 	messageData = string(data)
 
-	/*testMsg := generateMessage()
-	testMsg.MessageId = "10"
-	testMsg.Workload = 200
-	testMsg.Hops = []message.NodeData{{NodeId: "test", EntryTime: time.Now().UnixMicro(), ExitTime: time.Now().UnixMicro()}}
-
-	json, _ := easyjson.Marshal(testMsg)
-	fmt.Println(string(json))*/
-
-	/*for i := 0; i < 1000; i++ {
-		sendNextRESTMessage(Message{Workload: 20, MessageId: "test", Hops: []NodeData{{NodeId: "test"}}})
-	}*/
+	tr := http.DefaultTransport.(*http.Transport).Clone()
+	tr.MaxIdleConns = 0
+	tr.MaxIdleConnsPerHost = 0
+	tr.MaxConnsPerHost = 0
+	client = &http.Client{Transport: tr}
 
 	//fmt.Println(time.Now().UnixNano())
-	if config.Cfg.ServiceMode {
-		router := NewRouter()
-		log.Fatal(http.ListenAndServe(":8080", router))
-	} else {
-		processMessages()
+	//if config.Cfg.ServiceMode {
+	router := NewRouter()
+	/*srv := &http.Server{
+	    Addr:         "0.0.0.0:8080",
+	    // Good practice to set timeouts to avoid Slowloris attacks.
+	    WriteTimeout: time.Second * 15,
+	    ReadTimeout:  time.Second * 15,
+	    IdleTimeout:  time.Second * 60,
+	    Handler: router, // Pass our instance of gorilla/mux in.
+	}*/
+	for true {
+		http.ListenAndServe(":8080", router)
 	}
+	/*} else {
+		processMessages()
+	}*/
 }
 
 func getTlsConfig() *tls.Config {
@@ -123,11 +122,6 @@ func logger(line string) {
 }
 
 func generateMessage() message.Message {
-	/*data := ""
-	for i := 0; i < payloadSize; i++ {
-		data += strconv.Itoa(i % 10)
-	}*/
-
 	message := message.Message{
 		Payload: messageData,
 	}

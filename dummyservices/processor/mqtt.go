@@ -1,18 +1,8 @@
 package main
 
-import (
-	"encoding/json"
-	"fmt"
-	"processor/config"
-	"processor/message"
-	"time"
-
-	mqtt "github.com/eclipse/paho.mqtt.golang"
-)
-
 var running bool
 
-func processMessages() {
+/*func processMessages() {
 	running = true
 
 	c := *getClient()
@@ -24,9 +14,9 @@ func processMessages() {
 	for running {
 		time.Sleep(50 * time.Millisecond)
 	}
-}
+}*/
 
-func getClient() *mqtt.Client {
+/*func getClient() *mqtt.Client {
 	opts := mqtt.NewClientOptions()
 	opts.AddBroker(config.Cfg.MqttBroker)
 	opts.SetClientID(config.Cfg.MqttClientId).SetTLSConfig(getTlsConfig())
@@ -37,9 +27,9 @@ func getClient() *mqtt.Client {
 
 	client := mqtt.NewClient(opts)
 	return &client
-}
+}*/
 
-func handleMessage(client mqtt.Client, mess mqtt.Message) {
+/*func handleMessage(client mqtt.Client, mess mqtt.Message) {
 	msg := message.Message{}
 	json.Unmarshal(mess.Payload(), &msg)
 
@@ -47,9 +37,9 @@ func handleMessage(client mqtt.Client, mess mqtt.Message) {
 		//bubbleSort(config.Cfg.DefaultWorkloadSize)
 		//sendNextMqttMessage(msg.MessageId)
 	}()
-}
+}*/
 
-func sendNextMqttMessage(id int, time int64) {
+/*func sendNextMqttMessage(id int, time int64) {
 	fmt.Println("Sending content to MQTT")
 	client := *getClient()
 	if token := client.Connect(); token.Wait() && token.Error() != nil {
@@ -76,4 +66,4 @@ func sendNextMqttMessage(id int, time int64) {
 
 	fmt.Println("Published")
 	client.Disconnect(50)
-}
+}*/

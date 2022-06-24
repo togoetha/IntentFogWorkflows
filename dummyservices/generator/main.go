@@ -143,7 +143,15 @@ func generateMessage() message.Message {
 	return message
 }
 
+var client *http.Client
+
 func generate() {
+	tr := http.DefaultTransport.(*http.Transport).Clone()
+	tr.MaxIdleConns = 0
+	tr.MaxIdleConnsPerHost = 0
+	tr.MaxConnsPerHost = 0
+	client = &http.Client{Transport: tr}
+
 	frequency := 1000.0 / float32(MessageFrequency)
 	id := 1
 	//running = true
@@ -171,13 +179,7 @@ func generate() {
 			msg.MessageId = fmt.Sprintf("%s%d", InstanceName, msgId)
 			msg.Workload = config.Cfg.DefaultWorkloadSize
 
-			//message.SortSize = config.Cfg.DefaultWorkloadSize
-
-			//if config.Cfg.ServiceMode {
 			sendRESTMessage(msg)
-			/*} else {
-				sendMqttMessage(msg)
-			}*/
 		}(id)
 
 		id++
@@ -219,8 +221,10 @@ func sendRESTMessage(msg message.Message) string {
 			serviceUrl := fmt.Sprintf(config.Cfg.PushServiceURL, tIP)
 			msg.Hops = []message.NodeData{{NodeId: InstanceName, ExitTime: time.Now().UnixMicro()}}
 			jsonData, err := json.Marshal(msg)
-			_, err = http.Post(serviceUrl, "application/json",
+			resp, err := http.Post(serviceUrl, "application/json",
 				bytes.NewBuffer(jsonData))
+			resp.Body.Close()
+
 			log(fmt.Sprintf("%d Message id %s to service %s\n", time.Now().UnixMilli(), msg.MessageId, serviceUrl))
 			if err != nil {
 				log(fmt.Sprintf("%d Failed to write to service %s\n", time.Now().UnixMilli(), serviceUrl))
@@ -255,50 +259,6 @@ func sendTestMessage(msg message.Message) error {
 	}
 	return nil
 }
-
-/*func sendMqttMessage(msg message.Message) {
-	log("Sending content to MQTT")
-	client := *getClient()
-	if token := client.Connect(); token.Wait() && token.Error() != nil {
-		log("Connect failed")
-		log(token.Error().Error())
-	}
-
-	payload, err := easyjson.Marshal(msg)
-	if err != nil {
-		log(err.Error())
-	}
-
-	log("Publishing")
-	token := client.Publish(config.Cfg.MqttTopicWrite, 0, false, payload)
-	token.Wait()
-	if token.Error() != nil {
-		log("Publish failed")
-		log(token.Error().Error())
-	}
-
-	log("Published")
-	client.Disconnect(250)
-}*/
-
-/*func getTlsConfig() *tls.Config {
-	return &tls.Config{
-		ClientAuth: tls.RequestClientCert,
-	}
-}*/
-
-/*func getClient() *mqtt.Client {
-	opts := mqtt.NewClientOptions()
-	opts.AddBroker(config.Cfg.MqttBroker)
-	opts.SetClientID(config.Cfg.MqttClientId).SetTLSConfig(getTlsConfig())
-	opts.SetUsername(config.Cfg.MqttUser)
-	opts.SetPassword(config.Cfg.MqttPass) //flexnet
-
-	log(fmt.Sprintf("Connecting to %s\n", config.Cfg.MqttBroker))
-
-	client := mqtt.NewClient(opts)
-	return &client
-}*/
 
 func log(line string) {
 	f, err := os.OpenFile("/usr/bin/output.txt", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0666)

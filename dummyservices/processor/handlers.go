@@ -92,21 +92,21 @@ func sendNextRESTMessage(orig message.Message) {
 		}
 		logger(fmt.Sprintf("%d Sending to %s\n", time.Now().UnixMilli(), tIP))
 		//fmt.Printf("Sending to %s\n", tIP)
-		go func(target string) {
-			serviceUrl := fmt.Sprintf(config.Cfg.PushServiceURL, target)
-			data.Hops[len(data.Hops)-1].ExitTime = time.Now().UnixMicro()
-			jsonData, err := easyjson.Marshal(data)
-			_, err = http.Post(serviceUrl, "application/json",
-				bytes.NewBuffer(jsonData))
+		//go func(target string) {
+		serviceUrl := fmt.Sprintf(config.Cfg.PushServiceURL, tIP)
+		data.Hops[len(data.Hops)-1].ExitTime = time.Now().UnixMicro()
+		jsonData, err := easyjson.Marshal(data)
+		_, err = client.Post(serviceUrl, "application/json",
+			bytes.NewBuffer(jsonData))
 
-			if err != nil {
-				logger(fmt.Sprintf("%d Failed to write to service %s\n", time.Now().UnixMilli(), serviceUrl))
-				//fmt.Printf("Failed to write to service %s\n", serviceUrl)
-			} else {
-				logger(fmt.Sprintf("%d Message %s sent\n", time.Now().UnixMilli(), data.MessageId))
-			}
+		if err != nil {
+			logger(fmt.Sprintf("%d Failed to write to service %s\n", time.Now().UnixMilli(), serviceUrl))
+			//fmt.Printf("Failed to write to service %s\n", serviceUrl)
+		} else {
+			logger(fmt.Sprintf("%d Message %s sent\n", time.Now().UnixMilli(), data.MessageId))
+		}
 
-		}(tIP)
+		//}(tIP)
 		target.MessageCounts[tIP] += 1
 	}
 	TotalMessages++
