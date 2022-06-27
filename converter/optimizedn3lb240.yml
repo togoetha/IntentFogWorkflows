@@ -1,0 +1,192 @@
+network:
+  - name: "wf1"
+    msubnet: "192.168.99.0/24" # wf management subnet, to give each pod management IP, separate from data links
+    dsubnet: "192.168.0.0/24" # wf data subnet can use IPNetwork lib in python, good at parsing IPs
+    p2pdsubnets: ["192.168.0.0/30", "192.168.0.4/30", "192.168.0.8/30", "192.168.0.12/30", "192.168.0.16/30", "192.168.0.20/30"] #use smaller subnets for P2P connections while larger subnet for wf - need to double check though as work prgress.
+    igresssubnet: "192.168.199.0/24" #user ingress subnet for wf ingress requests
+    egresssubnet: "192.168.199.0/24" #user egress subnet for wf egress of results - it could be different from igress but he it just means the result comes back to same user requested it
+    numservices: 5   # this is the set of Msers
+    numedges: 6   # logical relationships between Msers (i.e. dependency map)
+    numnodes: 2   # deployment nodes
+nodes:
+  - name: node0
+    publicip: "10.2.0.84"
+    services:
+      - name: "user1request"
+        image: togoetha/dummygenerator
+        bandwidth: "100M"
+        memory: "200M"
+        cpu: "2000m"
+        workload: 10
+        latency: 0
+        mipaddr: "192.168.99.10/24"
+        dipaddr: ["192.168.199.10/24"]
+      - name: "userresponse"
+        image: togoetha/dummysink
+        bandwidth: "100M"
+        memory: "400M"
+        cpu: "2000m"
+        workload: 0
+        latency: 0
+        mipaddr: "192.168.99.20/24"
+        dipaddr: ["192.168.199.20/24"]
+  - name: node1 
+    publicip: "10.2.0.94"
+    services:
+      - name: "user2request"
+        image: togoetha/dummygenerator
+        bandwidth: "100M"
+        memory: "400M"
+        cpu: "2000m"
+        workload: 20
+        latency: 0
+        mipaddr: "192.168.99.11/24"
+        dipaddr: ["192.168.199.11/24"]
+  - name: node2 
+    publicip: "10.2.0.79"
+    services:
+      - name: "user3request"
+        image: togoetha/dummygenerator
+        bandwidth: "100M"
+        memory: "400M"
+        cpu: "2000m"
+        workload: 20
+        latency: 0
+        mipaddr: "192.168.99.12/24"
+        dipaddr: ["192.168.199.12/24"]
+  - name: node3 #4500
+    publicip: "10.2.0.96"
+    services:
+      - name: "n7.3"
+        image: togoetha/dummyprocessor
+        bandwidth: "100M"
+        memory: "400M"
+        cpu: "1500m"
+        workload: 1000
+        latency: 0
+        mipaddr: "192.168.99.3/24"
+        dipaddr: ["192.168.0.6/30", "192.168.0.17/30"]
+      - name: "n7.4"
+        image: togoetha/dummyprocessor
+        bandwidth: "100M"
+        memory: "400M"
+        cpu: "1500m"
+        workload: 1000
+        latency: 0
+        mipaddr: "192.168.99.4/24"
+        dipaddr: ["192.168.0.10/30", "192.168.0.21/30"]
+  - name: node4 #7500
+    publicip: "10.2.0.93"
+    services:
+      - name: "n8.3"
+        image: togoetha/dummyprocessor
+        bandwidth: "100M"
+        memory: "600M"
+        cpu: "1500m"
+        workload: 1000
+        latency: 0
+        mipaddr: "192.168.99.3/24"
+        dipaddr: ["192.168.0.7/30", "192.168.0.18/30"]
+      - name: "n8.4"
+        image: togoetha/dummyprocessor
+        bandwidth: "100M"
+        memory: "600M"
+        cpu: "1500m"
+        workload: 1000
+        latency: 0
+        mipaddr: "192.168.99.4/24"
+        dipaddr: ["192.168.0.11/30", "192.168.0.22/30"]
+      - name: "n8.5"
+        image: togoetha/dummyprocessor
+        bandwidth: "100M"
+        memory: "800M"
+        cpu: "4500m"
+        workload: 1000
+        latency: 0
+        mipaddr: "192.168.99.5/24"
+        dipaddr: ["192.168.0.14/30", "192.168.0.19/30", "192.168.0.23/30", "192.168.199.3/24"]
+  - name: node5 #4500
+    publicip: "10.2.0.75"
+    services:
+      - name: "n9.1"
+        image: togoetha/dummyprocessor
+        bandwidth: "100M"
+        memory: "400M"
+        cpu: "2300m"
+        workload: 1000
+        latency: 0
+        mipaddr: "192.168.99.1/24"
+        dipaddr: ["192.168.199.2/24", "192.168.0.1/30", "192.168.0.5/30", "192.168.0.9/30"]
+      - name: "n9.2"
+        image: togoetha/dummyprocessor
+        bandwidth: "100M"
+        memory: "400M"
+        cpu: "2200m"
+        workload: 1000
+        latency: 0
+        mipaddr: "192.168.99.2/24"
+        dipaddr: ["192.168.0.2/30", "192.168.0.13/30"]
+links:
+  - name: "user1-->wf1_ms1"
+    in: "192.168.199.10/24"
+    lblinks:
+      - out: "192.168.199.2/24"
+  - name: "user2-->wf1_ms1"
+    in: "192.168.199.11/24"
+    lblinks:
+      - out: "192.168.199.2/24"
+  - name: "user3-->wf1_ms1"
+    in: "192.168.199.12/24"
+    lblinks:
+      - out: "192.168.199.2/24"
+  - name: "wf1_ms1-->wf1_ms2"
+    in: "192.168.0.1/30"
+    lblinks:
+      - out: "192.168.0.2/30"
+  - name: "wf1_ms1-->wf1_ms3"
+    in: "192.168.0.5/30"
+    lblinks:
+      - out: "192.168.0.6/30"
+        quota: 0.01
+      - out: "192.168.0.7/30"
+        quota: 0.99
+  - name: "wf1_ms1-->wf1_ms4"
+    in: "192.168.0.9/30"
+    lblinks:
+      - out: "192.168.0.10/30"
+        quota: 0.01
+      - out: "192.168.0.11/30"
+        quota: 0.99
+  - name: "wf1_ms2-->wf1_ms5"
+    in: "192.168.0.13/30"
+    lblinks:
+      - out: "192.168.0.14/30"
+  - name: "wf1_ms3_1-->wf1_ms5"
+    in: "192.168.0.17/30"
+    lblinks:
+      - out: "192.168.0.19/30"
+  - name: "wf1_ms4_1-->wf1_ms5"
+    in: "192.168.0.21/30"
+    lblinks:
+      - out: "192.168.0.23/30"
+  - name: "wf1_ms3_2-->wf1_ms5"
+    in: "192.168.0.18/30"
+    lblinks:
+      - out: "192.168.0.19/30"
+  - name: "wf1_ms4_2-->wf1_ms5"
+    in: "192.168.0.22/30"
+    lblinks:
+      - out: "192.168.0.23/30"
+  - name: "wf1_ms5-->response"
+    in: "192.168.199.3/24"
+    lblinks:
+      - out: "192.168.199.20/24" 
+#delays:
+#  - from: "10.2.0.94"
+#    to: "10.2.0.96"
+#    delay: "50ms"
+
+
+
+
+

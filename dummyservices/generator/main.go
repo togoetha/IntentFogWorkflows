@@ -217,20 +217,20 @@ func sendRESTMessage(msg message.Message) string {
 				}
 			}
 		}
-		go func(target string) {
-			serviceUrl := fmt.Sprintf(config.Cfg.PushServiceURL, tIP)
-			msg.Hops = []message.NodeData{{NodeId: InstanceName, ExitTime: time.Now().UnixMicro()}}
-			jsonData, err := json.Marshal(msg)
-			resp, err := http.Post(serviceUrl, "application/json",
-				bytes.NewBuffer(jsonData))
-			resp.Body.Close()
+		//go func(target string) {
+		serviceUrl := fmt.Sprintf(config.Cfg.PushServiceURL, tIP)
+		msg.Hops = []message.NodeData{{NodeId: InstanceName, ExitTime: time.Now().UnixMicro()}}
+		jsonData, err := json.Marshal(msg)
+		_, err = http.Post(serviceUrl, "application/json",
+			bytes.NewBuffer(jsonData))
+		//resp.Body.Close()
+		//fmt.Printf("%s\n", msg.MessageId)
+		log(fmt.Sprintf("%d Message id %s to service %s\n", time.Now().UnixMilli(), msg.MessageId, serviceUrl))
+		if err != nil {
+			log(fmt.Sprintf("%d Failed to write to service %s\n", time.Now().UnixMilli(), serviceUrl))
+		}
 
-			log(fmt.Sprintf("%d Message id %s to service %s\n", time.Now().UnixMilli(), msg.MessageId, serviceUrl))
-			if err != nil {
-				log(fmt.Sprintf("%d Failed to write to service %s\n", time.Now().UnixMilli(), serviceUrl))
-			}
-
-		}(tIP)
+		//}(tIP)
 		target.MessageCounts[tIP] += 1
 	}
 	TotalMessages++
@@ -263,11 +263,11 @@ func sendTestMessage(msg message.Message) error {
 func log(line string) {
 	f, err := os.OpenFile("/usr/bin/output.txt", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
-		panic(err)
+		//panic(err)
 	}
 
 	defer f.Close()
 	if _, err = f.WriteString(line); err != nil {
-		panic(err)
+		//panic(err)
 	}
 }
