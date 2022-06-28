@@ -26,7 +26,7 @@ func main() {
 	//fmt.Printf("Loading config file %s\n", cfgFile)
 	config.LoadConfig(cfgFile)
 
-	inputYamlFile := "9ntier12.yml"
+	inputYamlFile := "2n_hs_badmm.yml"
 	if len(argsWithoutProg) > 0 {
 		inputYamlFile = argsWithoutProg[0]
 	}
