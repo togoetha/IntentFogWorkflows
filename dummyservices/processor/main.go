@@ -58,9 +58,9 @@ func main() {
 
 	start := time.Now()
 
-	bubbles := 10000
+	bubbles := 1000
 	for i := 0; i < bubbles; i++ {
-		bubbleSort(1000)
+		bubbleSort(1800)
 	}
 
 	fmt.Printf("%d bubbles took %f s\n", bubbles, float32(time.Since(start).Milliseconds())/1000.0)
