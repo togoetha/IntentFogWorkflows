@@ -10,6 +10,7 @@ import (
 	"processor/message"
 	"strconv"
 	"strings"
+	"time"
 )
 
 var InstanceName string
@@ -55,7 +56,14 @@ func main() {
 		}
 	}
 
-	//fmt.Printf("%d bubbles took %f s\n", bubbles, float32(time.Since(start).Milliseconds())/1000.0)
+	start := time.Now()
+
+	bubbles := 10000
+	for i := 0; i < bubbles; i++ {
+		bubbleSort(1000)
+	}
+
+	fmt.Printf("%d bubbles took %f s\n", bubbles, float32(time.Since(start).Milliseconds())/1000.0)
 
 	config.LoadConfig(cfgFile)
 
