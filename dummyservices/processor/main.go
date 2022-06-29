@@ -63,15 +63,15 @@ func main() {
 		bubbleSort(1800)
 	}
 
-	fmt.Printf("%d bubbles took %f ms\n", bubbles, float32(time.Since(start).Milliseconds()))
+	fmt.Printf("%d bubbles took %f ms\n", bubbles, float32(time.Since(start).Microseconds()/1000.0))
 
 	start = time.Now()
-	bubbles = 1
+	bubbles = 1000
 	for i := 0; i < bubbles; i++ {
 		bubbleSort(1800)
 	}
 
-	fmt.Printf("%d bubbles took %f ms\n", bubbles, float32(time.Since(start).Milliseconds()))
+	fmt.Printf("%d bubbles took %f ms\n", bubbles, float32(time.Since(start).Microseconds()/1000.0))
 
 	config.LoadConfig(cfgFile)
 

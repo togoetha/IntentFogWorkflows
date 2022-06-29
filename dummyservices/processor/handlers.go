@@ -43,7 +43,7 @@ func ProcessMessage(w http.ResponseWriter, r *http.Request) {
 	go func(msg message.Message) {
 		start := time.Now()
 		bubbleSort(WorkloadSize)
-		logger(fmt.Sprintf("%d Bubble sort for %s took %dms\n", time.Now().UnixMilli(), msg.MessageId, time.Since(start).Milliseconds()))
+		logger(fmt.Sprintf("%d Bubble sort %d items for %s took %dms\n", time.Now().UnixMilli(), WorkloadSize, msg.MessageId, time.Since(start).Milliseconds()))
 		sendNextRESTMessage(msg)
 	}(msg)
 }
