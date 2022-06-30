@@ -43,7 +43,7 @@ nodes:
         mipaddr: "192.168.99.11/24"
         dipaddr: ["192.168.199.11/24"]
   - name: node2 
-    publicip: "10.2.32.114"
+    publicip: "10.2.32.112"
     services:
       - name: "user3request"
         image: togoetha/dummygenerator
