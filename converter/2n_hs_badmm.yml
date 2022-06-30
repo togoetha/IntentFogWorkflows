@@ -10,13 +10,13 @@ network:
     numnodes: 2   # deployment nodes
 nodes:
   - name: node0
-    publicip: "10.2.0.84"
+    publicip: "10.2.32.114"
     services:
       - name: "user1request"
         image: togoetha/dummygenerator
         bandwidth: "100M"
         memory: "200M"
-        cpu: "1000m"
+        cpu: "2000m"
         workload: 40
         latency: 0
         mipaddr: "192.168.99.10/24"
@@ -25,37 +25,37 @@ nodes:
         image: togoetha/dummysink
         bandwidth: "100M"
         memory: "300M"
-        cpu: "1000m"
+        cpu: "2000m"
         workload: 0
         latency: 0
         mipaddr: "192.168.99.20/24"
         dipaddr: ["192.168.199.20/24"]
   - name: node1 
-    publicip: "10.2.0.94"
+    publicip: "10.2.32.108"
     services:
       - name: "user2request"
         image: togoetha/dummygenerator
         bandwidth: "100M"
         memory: "200M"
-        cpu: "1000m"
+        cpu: "2000m"
         workload: 40
         latency: 0
         mipaddr: "192.168.99.11/24"
         dipaddr: ["192.168.199.11/24"]
   - name: node2 
-    publicip: "10.2.0.79"
+    publicip: "10.2.32.112"
     services:
       - name: "user3request"
         image: togoetha/dummygenerator
         bandwidth: "100M"
         memory: "200M"
-        cpu: "1000m"
+        cpu: "2000m"
         workload: 40
         latency: 0
         mipaddr: "192.168.99.12/24"
         dipaddr: ["192.168.199.12/24"]
   - name: node3 #7500
-    publicip: "10.2.0.96"
+    publicip: "10.2.35.58"
     services:
       - name: "n7.2"
         image: togoetha/dummyprocessor
@@ -76,7 +76,7 @@ nodes:
         mipaddr: "192.168.99.5/24"
         dipaddr: ["192.168.0.14/24", "192.168.0.18/24", "192.168.0.22/24", "192.168.199.3/24"]
   - name: node4 #7500
-    publicip: "10.2.0.93"
+    publicip: "10.2.35.56"
     services:
       - name: "n8.1"
         image: togoetha/dummyprocessor
