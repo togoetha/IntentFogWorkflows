@@ -97,6 +97,13 @@ func main() {
 	    IdleTimeout:  time.Second * 60,
 	    Handler: router, // Pass our instance of gorilla/mux in.
 	}*/
+
+	defer func() {
+		if r := recover(); r != nil {
+			http.ListenAndServe(":8080", router)
+		}
+	}()
+
 	for true {
 		http.ListenAndServe(":8080", router)
 	}

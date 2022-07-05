@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"generator/config"
 	"generator/message"
+	"math/rand"
 	"net/http"
 	"os"
 	"os/exec"
@@ -29,6 +30,27 @@ type Target struct {
 var messageData string
 
 func main() {
+
+	/*mFrequency := 40
+	frequency := 1000.0 / float64(mFrequency)
+	debt := 0.0
+	latencies := []float64{}
+	for i := 0; i < 1000; i++ {
+		latency := (rand.NormFloat64()*(frequency/2000) + (frequency / 1000)) * 1000
+		if latency < 0 {
+			debt -= latency
+			latency = 0
+		} else if debt > 0 {
+			debt -= latency
+			latency = 0
+		}
+		latencies = append(latencies, latency)
+		fmt.Println(latency)
+	}
+
+	fmt.Println(stats.Mean(latencies))
+	fmt.Println(stats.StdDevS(latencies))
+	fmt.Println(debt)*/
 	/*fmt.Println("JSON test")
 	data := []byte{}
 	for i := 0; i < 30000; i++ {
@@ -152,7 +174,9 @@ func generate() {
 	tr.MaxConnsPerHost = 0
 	client = &http.Client{Transport: tr}
 
-	frequency := 1000.0 / float32(MessageFrequency)
+	frequency := 1000.0 / float64(MessageFrequency)
+	debt := 0.0
+
 	id := 1
 	//running = true
 
@@ -183,7 +207,16 @@ func generate() {
 		}(id)
 
 		id++
-		time.Sleep(time.Duration(frequency) * time.Millisecond)
+		//time.Sleep(time.Duration(frequency) * time.Millisecond)
+		latency := rand.NormFloat64()*(frequency/2000) + (frequency/1000)*1000 //rand.NormFloat64()*(frequency/1000) + (frequency / 1000) * 1000
+		if latency < 0 {
+			debt -= latency
+			latency = 0
+		} else if debt > 0 {
+			debt -= latency
+			latency = 0
+		}
+		time.Sleep(time.Duration(latency) * time.Millisecond)
 	}
 }
 
