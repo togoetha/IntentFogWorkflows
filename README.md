@@ -25,7 +25,7 @@ Mays AL-Naday, Tom Goethals, Bruno Volckaert
 |Average task size per microservice [mCPU] | [100 - 200] | 1|
 |Average input/output data per microservice [Mb] | [0.4, 8.0] | 0.03 |
 |Average response time tolerance [msec] | [30 - 150] | 35 |
-|Fog nodes per tier | $\{t_1:$ 2, $t_2:$ 3, $t_3:$ 4 $\}$ | $\{t_1:$ 1-2, $t_2:$ 2, $t_3:$ 3 $\}$ |
+|Fog nodes per tier | ${t_1:$ 2, $t_2:$ 3, $t_3:$ 4 $}$ | $\{t_1:$ 1-2, $t_2:$ 2, $t_3:$ 3 $\}$ |
 |Number of users per access node | [500, 2000] | 1 |
 |Average request rate per access node [request/s]| 1000 | 40 |
 |Average CPU capacity per node [mCPUs] | $\{t_1:$ [10$^6$ - 10$^7$], $t_2:$ [10$^5$ - 10$^6$], $t_3:$ [10$^4$ - 10$^5$] $\}$ | $\{t_1:$ 5000, $t_2:$ 3000, $t_3:$ 1000 $\}$|
