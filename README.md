@@ -34,5 +34,10 @@ Mays AL-Naday, Tom Goethals, Bruno Volckaert
 |Average bandwidth capacity per path [Mb/s] | {t<sub>1</sub>:[10<sup>5</sup> - 10<sup>6</sup>], t<sub>2</sub>:[10<sup>4</sup> - 10<sup>5</sup>], t<sub>3</sub>:[10<sup>3</sup> - 10<sup>4</sup>]} | {t<sub>1</sub>:1000, t<sub>2</sub>:1000, t<sub>3</sub>:100} |
 |Average link length [Km] | {t<sub>1</sub>:[10-100], t<sub>2</sub>:[1-10], t<sub>3</sub>:[0.5-1]} | {t<sub>1</sub>:10, t<sub>2</sub>:10, t<sub>3</sub>:10} |
 
+## Experimental Evaluation
+
+---
+
+Experimental evaluations are run on fog nodes with a Gigabit Ethernet connection, an Intel i5 9400 processor, and 32GiB RAM. A unit of processing work (mCPU) is defined as the CPU time required to bubble sort 1000 integers in Golang, which equals $6/5$ physical milliCPU on the evaluation nodes. A tiered architecture is simulated by limiting the total CPU budget of all microservices on each node.
 
 
