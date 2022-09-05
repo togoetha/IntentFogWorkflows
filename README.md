@@ -27,6 +27,7 @@ Mays AL-Naday, Tom Goethals, Bruno Volckaert
 |Average response time tolerance [msec] | [30 - 150] | 35 |
 |Fog nodes per tier | {t<sub>1</sub>:2, t<sub>2</sub>:3, t<sub>3</sub>:4} | {t<sub>1</sub>:[1-2], t<sub>2</sub>:2, t<sub>3</sub>:3} |
 |Number of users per access node | [500, 2000] | 1 |
+|Number of access nodes | 11 | 3 |
 |Average request rate per access node [request/s]| 1000 | 40 |
 |Average CPU capacity per node [mCPUs] | {t<sub>1</sub>:[10<sup>6</sup> - 10<sup>7</sup>], t<sub>2</sub>:[10<sup>5</sup> - 10<sup>6</sup>], t<sub>3</sub>:[10<sup>4</sup> - 10<sup>5</sup>]} | {t<sub>1</sub>:5000, t<sub>2</sub>:3000, t<sub>3</sub>:1000}|
 |Average CPU energy price per node [PpmCPU] | {t<sub>1</sub>:[10<sup>-5</sup> - 10<sup>-4</sup>], t<sub>2</sub>:[10<sup>-4</sup> - 10<sup>-3</sup>], t<sub>3</sub>:[10<sup>-3</sup> - 10<sup>-2</sup>]} |-- |
