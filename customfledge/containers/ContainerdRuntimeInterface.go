@@ -312,7 +312,7 @@ func (dri *ContainerdRuntimeInterface) SetupPodIPs(pod *v1.Pod, task containerd.
 			pidJson, _ := json.Marshal(pids)
 			fmt.Printf("Container pids %s", string(pidJson))
 
-			//MAKE SURE THE DAMN ASS CGROUPS ARE SET
+			//MAKE SURE THE CGROUPS ARE SET
 			cgroup := GetCgroup(pod.Namespace, pod.Name, containerName)
 			for _, pid := range pids {
 				MovePid(cgroup, uint64(pid.Pid))
